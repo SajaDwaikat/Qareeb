@@ -3,47 +3,12 @@ import {View,Text,FlatList,StyleSheet,Image,Dimensions,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useProperties from "@/hooks/useProperties";
-import { useRouter } from "expo-router";
-import { Pressable } from "react-native";
+import PropertyCard from "@/components/property/PropertyCard";
 
 
 const { width, height } = Dimensions.get("window");
 
 
-const Card = ({ item }: any) => {
-  const router = useRouter();
-  
-  return (
-    <Pressable
-      style={styles.card}
-      onPress={() => router.push(`/property/${item.id}`)}
-    >
-      <View> 
-        <Image source={{ uri: item.image }} style={styles.cardImage} />
-
-        
-        <View style={styles.rating}>
-          <Text style={{ fontWeight: "700" }}>⭐ 4.9</Text>
-        </View>
-      </View>
-
-      
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.title}</Text>
-
-        <Text style={styles.price}>
-          ₪{item.price}
-          <Text style={styles.month}> / month</Text>
-        </Text>
-
-        <View style={styles.row}>
-          <Text style={styles.detail}>🛏 3 Bed</Text>
-          <Text style={styles.detail}>🛁 2 Bath</Text>
-        </View>
-      </View>
-        </Pressable>
-  );
-};
 
 export default function Home() {
   const { topRatedProperties } = useProperties();
@@ -88,7 +53,11 @@ export default function Home() {
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => <Card item={item} />}
+           renderItem={({ item }) => (
+  <View style={{ width: width * 0.78, marginRight: 16 }}>
+    <PropertyCard property={item} />
+  </View>
+)}
             contentContainerStyle={{ paddingHorizontal: 16 }}
           />
         </View>
@@ -108,9 +77,10 @@ const styles = StyleSheet.create({
   },
 
   overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.25)",
-  },
+  ...StyleSheet.absoluteFillObject,
+  backgroundColor: "rgba(0,0,0,0.25)",
+  pointerEvents: "none", 
+},
 
   safe: { flex: 1 },
 
