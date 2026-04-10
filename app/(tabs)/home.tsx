@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
  
   centerText: {
     position: "absolute",
-    top: height * 0.28,
+    top: height * 0.15,
     alignSelf: "center",
     alignItems: "center",
     paddingHorizontal: 20,
