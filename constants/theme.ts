@@ -51,3 +51,19 @@ export const Fonts = Platform.select({
     mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
   },
 });
+
+// onwer dashoard
+export const AppColors = {
+  primary: '#2F80ED',
+  primaryLight: '#EAF4FF',
+  screenBackground: '#F5F7FB',
+  cardBackground: '#FFFFFF',
+  darkText: '#0F172A',
+  secondaryText: '#667085',
+  border: '#E4E7EC',
+  success: '#16A34A',
+  warning: '#F97316',
+  danger: '#EF4444',
+  muted: '#98A2B3',
+  darkCard: '#10213A',
+};
