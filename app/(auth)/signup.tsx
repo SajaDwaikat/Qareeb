@@ -81,7 +81,7 @@ export default function Signup() {
             secure
           />
 
-         <Button title="Sign Up" onPress={() => console.log("Signup pressed")} />
+         <Button title="Sign Up" onPress={() => router.replace("/(auth)/login")} />
 
           <Pressable
             onPress={() => router.replace("/(auth)/login")}

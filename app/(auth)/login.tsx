@@ -58,7 +58,7 @@ export default function Login() {
                   <Text style={styles.rememberText}>Stay logged in</Text>
               </View>
 
-              <Button title="Log In" onPress={() => console.log("Login pressed")} />
+              <Button title="Log In" onPress={() => router.replace("/(tabs)/home")} />
         
               <Text style={styles.divider}> OR CONTINUE WITH</Text>        
 
