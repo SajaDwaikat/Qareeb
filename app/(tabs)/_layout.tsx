@@ -7,8 +7,8 @@ export default function TabsLayout() {
       screenOptions={{
   headerShown: false,
 
-  tabBarActiveTintColor: "#007AFF",   // 🔥 الأزرق
-  tabBarInactiveTintColor: "#888",   // الرمادي
+  tabBarActiveTintColor: "#007AFF",   
+  tabBarInactiveTintColor: "#888",   
 
   tabBarStyle: {
     position: "absolute",
@@ -28,7 +28,7 @@ export default function TabsLayout() {
 }}
     >
 
-        {/* HOME */}
+       
       <Tabs.Screen
         name="home"
         options={{
@@ -40,7 +40,7 @@ export default function TabsLayout() {
       />
     
 
-      {/* LISTINGS */}
+      
       <Tabs.Screen
         name="listings"
         options={{
@@ -51,7 +51,6 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* FAVORITES */}
       <Tabs.Screen
         name="favourites"
         options={{
@@ -62,7 +61,7 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* ALERTS */}
+     
       <Tabs.Screen
         name="notifications"
         options={{
@@ -73,7 +72,7 @@ export default function TabsLayout() {
         }}
       />
 
-      {/* PROFILE */}
+      
       <Tabs.Screen
         name="profile"
         options={{
