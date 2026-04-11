@@ -32,7 +32,7 @@ export default function AdminDashboardScreen() {
         Admin Dashboard
       </Text>
 
-      {/* 📊 Stats */}
+     
       <View style={styles.statsRow}>
         <StatCard title="Users" value={stats.users} icon="account-group"/>
         <StatCard title="Properties" value={stats.properties} icon="home-city"/>
@@ -43,7 +43,7 @@ export default function AdminDashboardScreen() {
         <StatCard title="Renters" value={stats.renters} icon="account" />
       </View>
 
-      {/* 🏠 Requests */}
+  
       <Text variant="titleLarge" style={styles.section}>
         Property Requests
       </Text>
