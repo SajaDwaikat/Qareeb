@@ -1,4 +1,4 @@
-import React from "react";
+
 import { Card, Icon, Text } from "react-native-paper";
 import { StyleSheet, View } from "react-native";
 
@@ -6,7 +6,7 @@ export default function StatCard({ title, value, icon }) {
   return (
     <Card style={styles.card}>
       <Card.Content style={styles.row} >
-        <View style={styles.iconContainer}>
+        <View>
           <Icon source={icon} size={32} />
           <Text variant="titleMedium">{title}</Text>
         </View>
