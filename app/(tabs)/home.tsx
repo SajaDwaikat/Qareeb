@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useProperties from "@/hooks/useProperties";
 import PropertyCard from "@/components/property/PropertyCard";
+import Header from "@/components/ui/Header";
 
 
 const { width, height } = Dimensions.get("window");
@@ -15,8 +16,9 @@ export default function Home() {
   const tabHeight = useBottomTabBarHeight();
 
   return (
+    
     <View style={styles.root}>
-      
+     
       <Image
         source={require("../../assets/images/nablus-map.png")}
         style={styles.bg}
@@ -27,14 +29,7 @@ export default function Home() {
 
       <SafeAreaView style={styles.safe}>
         
-        <View style={styles.header}>
-          <View style={styles.headerContent}>
-            <View style={styles.icon}>
-              <Text style={styles.iconText}>📍</Text>
-            </View>
-            <Text style={styles.headerText}>Nablus Horizon</Text>
-          </View>
-        </View>
+        <Header title=" 📍 Nablus Horizon" />
 
        
         <View style={styles.centerText}>
