@@ -16,7 +16,10 @@ export default function Login() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f9fafb" }}>
       <ScrollView contentContainerStyle={styles.container}>
+
         <Logo title="Qareeb" icon="business-outline" />
+
+     
         <View style={styles.header}>
           <Text style={styles.title}>
             Welcome back to the{""}
