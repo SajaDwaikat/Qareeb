@@ -19,7 +19,7 @@ export default function PropertyDetails() {
   return (
     <View style={{ flex: 1 }}>
 
-      {/* 🖼️ Image */}
+      
       <Image
         source={{ uri: property.image }}
         style={{ width: "100%", height: 250 }}
@@ -38,7 +38,7 @@ export default function PropertyDetails() {
           ⭐ {property.rating}
         </Text>
 
-        {/* 🔥 Book Button */}
+      
         <Pressable
           onPress={() => router.push("/booking")}
           style={{
