@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import useProperties from "@/hooks/useProperties";
 import PropertyCard from "@/components/property/PropertyCard";
 import { Alert } from "react-native";
+import Header from "@/components/ui/Header";
 
 
 export default function Listings() {
@@ -48,9 +49,7 @@ const filteredProperties = properties.filter((item) => {
   return (
     <SafeAreaView style={styles.container}>
       
-      <View style={styles.header}>
-        <Text style={styles.logo}>🔍 Nablus Live</Text>
-      </View>
+      <Header title="🔍 Nablus Live" />
 
       <Text style={styles.title}>Find your space in Nablus</Text>
       <Text style={styles.subtitle}>
