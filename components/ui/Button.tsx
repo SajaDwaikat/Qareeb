@@ -25,6 +25,11 @@ export default function Button({
 
 const styles = StyleSheet.create({
   container: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 3,
     marginTop: 25,
   },
   button: {
