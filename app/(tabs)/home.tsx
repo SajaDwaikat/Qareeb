@@ -5,6 +5,8 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useProperties from "@/hooks/useProperties";
 import PropertyCard from "@/components/property/PropertyCard";
 import Header from "@/components/ui/Header";
+import { ActivityIndicator } from "react-native";
+import useFirebaseProperties from "@/hooks/useFirebaseProperties";
 
 
 const { width, height } = Dimensions.get("window");
@@ -12,8 +14,20 @@ const { width, height } = Dimensions.get("window");
 
 
 export default function Home() {
-  const { topRatedProperties } = useProperties();
+  const { properties, loading } = useFirebaseProperties();
   const tabHeight = useBottomTabBarHeight();
+
+  const topRatedProperties = properties.filter(
+  (item) => item.rating >= 4.5
+);
+
+ if (loading) {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" color="#007AFF" />
+    </View>
+  );
+}
 
   return (
     
