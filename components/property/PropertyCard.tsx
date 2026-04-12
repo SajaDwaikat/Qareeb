@@ -9,9 +9,14 @@ export default function PropertyCard({
 }: any) {
   const router = useRouter();
 
-  const handlePress = () => {
-    router.push(`/property/${property.id}`);
-  };
+const handlePress = () => {
+
+  router.push(`/property/${property.id}`);
+};
+
+<Pressable style={styles.button} onPress={handlePress}>
+  <Text style={styles.buttonText}>View Details</Text>
+</Pressable>
 
   return (
     <View style={styles.card}>
