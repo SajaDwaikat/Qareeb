@@ -1,21 +1,25 @@
 import React, { useState } from "react";
 import { View,Text,StyleSheet,TextInput,FlatList,Pressable,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useProperties from "@/hooks/useProperties";
-import PropertyCard from "@/components/property/PropertyCard";
+import useFirebaseProperties from "@/hooks/useFirebaseProperties";import PropertyCard from "@/components/property/PropertyCard";
 import { Alert } from "react-native";
 import Header from "@/components/ui/Header";
+import { ActivityIndicator } from "react-native";
+
+
 
 
 export default function Listings() {
-const { properties } = useProperties();
+const { properties, loading } = useFirebaseProperties();
   const [selectedTab, setSelectedTab] = useState("All");
   const [search, setSearch] = useState(""); 
 
   const [favorites, setFavorites] = useState<string[]>([]);
-
-
-const toggleFavorite = (id: string) => {
+  
+  if (loading) {
+  return <ActivityIndicator size="large" color="#007AFF" />;
+}
+  const toggleFavorite = (id: string) => {
   setFavorites((prev) => {
     const isFav = prev.includes(id);
 
