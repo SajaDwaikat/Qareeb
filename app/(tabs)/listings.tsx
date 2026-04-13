@@ -1,59 +1,74 @@
-import React, { useState } from "react";
-import { View,Text,StyleSheet,TextInput,FlatList,Pressable,} from "react-native";
+import React, { useState, useMemo, useCallback } from "react";
+import {View,Text,StyleSheet,TextInput,FlatList,Pressable,ActivityIndicator,Alert,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import useFirebaseProperties from "@/hooks/useFirebaseProperties";import PropertyCard from "@/components/property/PropertyCard";
-import { Alert } from "react-native";
+import useFirebaseProperties from "@/hooks/useFirebaseProperties";
+import PropertyCard from "@/components/property/PropertyCard";
 import Header from "@/components/ui/Header";
-import { ActivityIndicator } from "react-native";
 
 
+const TABS = ["All", "Student", "Family"];
+const filterProperties = (
+  properties: any[],
+  selectedTab: string,
+  search: string
+) => {
+  const searchValue = search.trim().toLowerCase();
+  const isNumber = searchValue !== "" && !isNaN(Number(searchValue));
 
+  return properties.filter((item) => {
+    const matchesTab =
+      selectedTab === "All" ||
+      item.type === selectedTab.toLowerCase();
 
-export default function Listings() {
-const { properties, loading } = useFirebaseProperties();
-  const [selectedTab, setSelectedTab] = useState("All");
-  const [search, setSearch] = useState(""); 
+    const matchesSearch =
+      searchValue === "" ||
+      (isNumber
+        ? item.price <= Number(searchValue)
+        : item.title.toLowerCase().includes(searchValue) ||
+          item.location.toLowerCase().includes(searchValue));
 
-  const [favorites, setFavorites] = useState<string[]>([]);
-  
-  if (loading) {
-  return <ActivityIndicator size="large" color="#007AFF" />;
-}
-  const toggleFavorite = (id: string) => {
-  setFavorites((prev) => {
-    const isFav = prev.includes(id);
-
-    if (!isFav) {
-      Alert.alert("❤️ Added", "Added to favorites");
-    }
-
-    return isFav
-      ? prev.filter((f) => f !== id)
-      : [...prev, id];
+    return matchesTab && matchesSearch;
   });
 };
 
-const filteredProperties = properties.filter((item) => {
-  const searchValue = search.trim().toLowerCase();
-  const isNumber = !isNaN(Number(searchValue));
 
-  const matchesTab =
-    selectedTab === "All" ||
-    item.type === selectedTab.toLowerCase();
+export default function Listings() {
+  const { properties, loading } = useFirebaseProperties();
 
-  const matchesSearch =
-    searchValue === "" ||
-    (isNumber
-      ? item.price <= Number(searchValue) 
-      : item.title.toLowerCase().includes(searchValue)); 
+  const [selectedTab, setSelectedTab] = useState("All");
+  const [search, setSearch] = useState("");
+  const [favorites, setFavorites] = useState<string[]>([]);
 
-  return matchesTab && matchesSearch;
-});
+  const filteredProperties = useMemo(() => {
+    return filterProperties(properties, selectedTab, search);
+  }, [properties, selectedTab, search]);
+
+  const toggleFavorite = useCallback((id: string) => {
+    setFavorites((prev) => {
+      const isFav = prev.includes(id);
+
+      if (!isFav) {
+        Alert.alert("❤️ Added", "Added to favorites");
+      }
+
+      return isFav
+        ? prev.filter((f) => f !== id)
+        : [...prev, id];
+    });
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       
-      <Header title="🔍 Nablus Live" />
+      <Header title="Qareeb" />
 
       <Text style={styles.title}>Find your space in Nablus</Text>
       <Text style={styles.subtitle}>
@@ -71,14 +86,13 @@ const filteredProperties = properties.filter((item) => {
       </View>
 
       <View style={styles.tabs}>
-        {["All", "Student", "Family"].map((tab) => (
+        {TABS.map((tab) => (
           <Pressable
             key={tab}
             onPress={() => {
               setSelectedTab(tab);
-              setSearch(""); 
-              }}
-           
+              setSearch(""); // reset search
+            }}
             style={[
               styles.tab,
               selectedTab === tab && styles.activeTab,
@@ -96,29 +110,27 @@ const filteredProperties = properties.filter((item) => {
         ))}
       </View>
 
-    <FlatList
-    data={filteredProperties}
-    keyExtractor={(item) => item.id.toString()}
-    showsVerticalScrollIndicator={false}
-    renderItem={({ item }) => (
-
-  <View style={styles.cardWrapper}>
-    <PropertyCard
-      property={item}
-      showFavorite={true}
-      isFavorite={favorites.includes(item.id)}
-      onToggleFavorite={() => toggleFavorite(item.id)}
-    />
-  </View>
-)}
-  contentContainerStyle={styles.listContent}
-
-  ListEmptyComponent={
-    <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>No results found</Text>
-    </View>
-  }
-  />
+      <FlatList
+        data={filteredProperties}
+        keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
+          <View style={styles.cardWrapper}>
+            <PropertyCard
+              property={item}
+              showFavorite={true}
+              isFavorite={favorites.includes(item.id)}
+              onToggleFavorite={() => toggleFavorite(item.id)}
+            />
+          </View>
+        )}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No results found</Text>
+          </View>
+        }
+      />
     </SafeAreaView>
   );
 }
@@ -128,17 +140,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f6f8",
-  },
-
-  header: {
-    paddingHorizontal: 20,
-    paddingTop: 10,
-    marginBottom: 10,
-  },
-
-  logo: {
-    fontWeight: "700",
-    fontSize: 16,
   },
 
   title: {
@@ -199,17 +200,23 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
 
-  emptyContainer: {
-  alignItems: "center",
-  marginTop: 50,
-},
-
-emptyText: {
-  fontSize: 16,
-  color: "#999",
-},
-
   cardWrapper: {
     marginBottom: 16,
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 50,
+  },
+
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
