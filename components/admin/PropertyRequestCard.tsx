@@ -1,55 +1,76 @@
-import * as React from "react";
-import { Card, Text, Button } from "react-native-paper";
-import { StyleSheet, View } from "react-native";
+import React from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 
-export default function PropertyRequestCard({ item, onAccept, onReject }) {
+interface Props {
+  item: any;
+  onAccept: (id: string) => void;
+  onReject: (id: string) => void;
+}
+
+export default function PropertyRequestCard({
+  item,
+  onAccept,
+  onReject,
+}: Props) {
   return (
-    <Card style={styles.card}>
-      <Card.Content>
-        <Text variant="titleMedium">{item.title}</Text>
-        <Text>{item.location}</Text>
+    <View style={styles.card}>
+      <Text style={styles.title}>{item.title}</Text>
+      <Text style={styles.location}>{item.location}</Text>
 
-        <View style={styles.row}>
-          <Button
-            mode="contained"
-            onPress={() => onAccept(item.id)}
-            style={styles.accept}
-          >
-            Accept
-          </Button>
+      <View style={styles.buttons}>
+        <Pressable
+          style={[styles.button, styles.accept]}
+          onPress={() => onAccept(item.id)}
+        >
+          <Text style={styles.text}>Accept</Text>
+        </Pressable>
 
-          <Button
-            mode="contained"
-            onPress={() => onReject(item.id)}
-            style={styles.reject}
-          >
-            Reject
-          </Button>
-        </View>
-      </Card.Content>
-    </Card>
+        <Pressable
+          style={[styles.button, styles.reject]}
+          onPress={() => onReject(item.id)}
+        >
+          <Text style={styles.text}>Reject</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    marginVertical: 8,
-    borderRadius: 12,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+    elevation: 3,
   },
-  row: {
+  title: {
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  location: {
+    color: "#777",
+    marginTop: 4,
+  },
+  buttons: {
     flexDirection: "row",
-    justifyContent: "space-between",
     marginTop: 10,
   },
-  accept: {
+  button: {
     flex: 1,
-    marginRight: 5,
-    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 10,
+    alignItems: "center",
+    marginHorizontal: 5,
+  },
+  accept: {
+    backgroundColor: "#2ecc71",
   },
   reject: {
-    flex: 1,
-    marginLeft: 5,
-    color: "#ffffff",
-    backgroundColor: "#f44336",
+    backgroundColor: "#e74c3c",
+  },
+  text: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
