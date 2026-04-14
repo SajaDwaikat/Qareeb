@@ -41,7 +41,6 @@ export default function Signup() {
       }
     }
 
-
     if (!PhoneNum) newErrors.phone = "Phone number is required";
 
     if (!password) {
@@ -56,13 +55,11 @@ export default function Signup() {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    // If errors exist → stop
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    // Clear errors if everything is valid
     setErrors({
       name: "",
       email: "",
