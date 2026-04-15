@@ -11,7 +11,7 @@ import Checkbox from "expo-checkbox";
 import { Linking } from "react-native";
 import Logo from "@/components/ui/Logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "../../lib/firebase";
+import { auth,} from "../../lib/firebase";
 
 
 const size = 60;
@@ -61,15 +61,24 @@ export default function Login() {
 
       router.replace("/(tabs)/home");
 
-    } catch (error:any){
-      let errorMessage = "Something went wrong";
+    } catch (error: any) {
+      console.log("ERROR CODE:", error.code);
 
-      if (error.code === "auth/user-not-found"){
-        errorMessage = "No account found with this email";
-      } else if (error.code === "auth/wrong-password"){
-        errorMessage = "Incorrect password";
-      } else if (error.code === "auth/invalid-email"){
-        errorMessage = "Invalid email format";
+      let errorMessage = "Login failed. Try again.";
+
+      switch (error.code) {
+        case "auth/user-not-found":
+        case "auth/invalid-credential":
+          errorMessage = "No account found with this email";
+          break;
+
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password";
+          break;
+
+        case "auth/invalid-email":
+          errorMessage = "Invalid email format";
+          break;
       }
 
       setErrors({
@@ -160,13 +169,13 @@ export default function Login() {
                   onPress={() => router.replace("/(auth)/signup")}
                   >
                   <Text style={styles.footer}>
-                      Already have an account?{" "}
+                      Don't have an account?{" "}
                     <Text style={styles.signup}>Sign up</Text>
                   </Text>
                </Pressable>
         </Card>
         <Text style={styles.copy}>
-          © 2024 Nablus Live. All rights reserved.
+          © 2026 Qareeb. All rights reserved.
         </Text>
       </ScrollView> 
     </SafeAreaView>
