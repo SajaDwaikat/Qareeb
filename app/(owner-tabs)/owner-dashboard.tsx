@@ -94,7 +94,7 @@ export default function OwnerDashboard() {
       id: "1",
       title: "Add New Property",
       icon: "add-circle-outline",
-      route: "/(owner-tabs)/add-listing",
+      route: "/Prop/add",
       filled: true,
     },
     {
