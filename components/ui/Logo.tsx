@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
-const Logo = ({ title = "Nablus Live", icon = "business-outline" }) => {
+const Logo = ({ title = "", icon = "business-outline" }) => {
   return (
     <View style={styles.logoRow}>
       <View style={styles.logoCircle}>
