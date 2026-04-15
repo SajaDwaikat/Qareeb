@@ -1,12 +1,5 @@
-import { useEffect } from "react";
-import { router } from "expo-router";
+import { Redirect } from "expo-router";
 
-export default function Splash() {
-  useEffect(() => {
-    setTimeout(() => {
-      router.replace("/(auth)/user-type");
-    }, 1000);
-  }, []);
-
-  return null;
+export default function Index() {
+  return <Redirect href="/(owner-tabs)/owner-dashboard" />;
 }

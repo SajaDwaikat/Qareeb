@@ -2,19 +2,26 @@ import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
+type InputFieldProps = {
+  label: string;
+  icon: any;
+  placeholder: string;
+  secure?: boolean;
+  rightElement?: React.ReactNode;
+  value?: string;
+  onChangeText?: (text: string) => void;
+  error?: string;
+  
+};
 export default function InputField({
   label,
   icon,
   placeholder,
   secure,
   rightElement,
-}: {
-  label: string;
-  icon: any;
-  placeholder: string;
-  secure?: boolean;
-  rightElement?: React.ReactNode;
-}) {
+  value,
+  onChangeText,
+}: InputFieldProps) {
   return (
     <>
       <View style={styles.labelRow}>
@@ -29,6 +36,8 @@ export default function InputField({
           placeholder={placeholder}
           placeholderTextColor="#9ca3af"
           style={styles.input}
+          value={value}
+          onChangeText={onChangeText}
         />
       </View>
     </>

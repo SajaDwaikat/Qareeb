@@ -1,4 +1,4 @@
-import { View, Text, Pressable, TouchableOpacity, StyleSheet} from "react-native";
+import { View, Text, Pressable, TouchableOpacity, StyleSheet, ScrollView} from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
@@ -7,10 +7,12 @@ import { set } from "react-hook-form";
 import Card from "@/components/ui/AuthCard";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "@/components/ui/Button";
+import Logo from "@/components/ui/Logo";
 
 type IconName = React.ComponentProps<typeof Ionicons>["name"];
 export default function UserType() {
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   
   const roles: {
     name: string;
@@ -29,18 +31,17 @@ export default function UserType() {
       description:
         "Manage your listings, verify tenants, and optimize your rental income.",
     },
-
   ];
   
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f7f7f7" }}>
-      <Header title="Qareeb"/>
-      <View style={styles.container}>
-        <Text style={styles.title}>Welcome to Nablus</Text>
-        <Text style={styles.subtitle}>
-          Select your profile to personalize your experience with housing and
-          transportation.
-        </Text>
+      <ScrollView style={styles.container}>
+        <Logo title="Qareeb" icon="business-outline" />
+        
+        <View style={styles.header}>
+            <Text style={styles.title}>Welcome to Nablus</Text>
+            <Text style={styles.subtitle}> Select your profile to personalize your experience with housing and transportation.</Text>
+        </View>
 
         {roles.map((role) => (
           <TouchableOpacity
@@ -62,25 +63,42 @@ export default function UserType() {
               </Card>
           </TouchableOpacity>
         ))}
-        <Button title="Continue" onPress={() => router.replace("/(auth)/signup")} />
-      </View> 
+        {error && <Text style={styles.errorText}>{error}</Text>}
+        <Button 
+          title = "Continue"
+          onPress = {() => {
+            if (!selectedRole) {
+              setError("Please select a role first");
+              return;
+            }
+        
+            router.replace({
+              pathname: "/(auth)/signup",
+              params: {role: selectedRole},
+            });
+          }}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#f7f7f7",
-    paddingHorizontal: 20,
+    flexGrow:1,
+    paddingTop: 15,
+    paddingHorizontal: 40,
+    backgroundColor: "#f9fafb",
+  },
+  header:{
+    marginTop:20,
+    marginBottom:20,
   },
 
   title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#333",
-    marginTop: 30,
-    textAlign: "center",
+    fontSize:24,
+    fontWeight:"600",
+    color: "#222",
   },
 
   subtitle: {
@@ -92,7 +110,7 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    marginBottom: 50,
+    marginBottom: 40,
     alignItems: "center",
   },
 
@@ -121,4 +139,10 @@ const styles = StyleSheet.create({
     color: "#777",
     textAlign: "center",
   },
+  errorText: {
+    color: "red",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
 });
