@@ -4,15 +4,18 @@ import {ScrollView, StyleSheet, Text, View, Pressable} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import InputField from "../../components/ui/InputField";
 import Button from "../../components/ui/Button";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import Header from "@/components/ui/Header";
 import Card from "@/components/ui/AuthCard";
+import Logo from "@/components/ui/Logo";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
+  const {role} = useLocalSearchParams();
+
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -34,7 +37,8 @@ export default function Signup() {
 
     if (!email) {
       newErrors.email = "Email is required";
-    } else {
+    } 
+    else {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         newErrors.email = "Enter a valid email address";
@@ -79,7 +83,12 @@ export default function Signup() {
         createdAt: new Date(),
       });
 
-      router.replace("/(auth)/login");
+      if (role === "User"){
+        router.replace("/(tabs)/home");
+      } else {
+        router.replace("/(owner-tabs)/owner-dashboard");
+      }
+
 
     } catch (error: any) {
       let message = "Something went wrong";
@@ -92,15 +101,12 @@ export default function Signup() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f9fafb" }}>
-      <Header title="Digital Sanctuary "/>
       <ScrollView contentContainerStyle={styles.container}>
         
         <View style={styles.header}>
-          <View style={styles.logoBox}>
-            <Ionicons name="business-outline" size={28} color="#0169d8" />
-          </View>
+          <Logo icon="business-outline" />
 
-          <Text style={styles.title}>Welcome to Nablus Live</Text>
+          <Text style={styles.title}>Welcome to Qareeb</Text>
 
           <Text style={styles.subtitle}>
             Your architectural portal to housing and luxury transport in the
@@ -109,6 +115,7 @@ export default function Signup() {
         </View>
 
         <Card>
+          <Text style={styles.signup}> Sign Up</Text>
           <InputField
             label="Full Name"
             icon="person-outline"
@@ -164,6 +171,9 @@ export default function Signup() {
             </Text>
           </Pressable>
         </Card>
+        <Text style={styles.copy}>
+          © 2026 Qareeb. All rights reserved.
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -177,7 +187,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
     alignItems: "center",
   },
@@ -207,6 +217,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
+  signup:{
+    fontSize: 20,
+    fontWeight: 400,
+    textAlign: "center",
+    color: "#000000",
+  },
+  
   label: {
     marginTop: 20,
     marginBottom: 5,
@@ -243,5 +260,11 @@ const styles = StyleSheet.create({
   marginBottom: 10,
   marginLeft: 5,
 },
+copy:{
+    textAlign:"center",
+    marginTop:30,
+    color:"#aaa",
+    fontSize:10,
+  },
 });
 
