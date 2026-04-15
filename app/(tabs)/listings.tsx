@@ -1,33 +1,16 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  FlatList,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
+import {View,Text,StyleSheet,TextInput,FlatList,Pressable,ActivityIndicator,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import useFirebaseProperties from "@/hooks/useFirebaseProperties";
 import PropertyCard from "@/components/property/PropertyCard";
 import Header from "@/components/ui/Header";
 
-// 🔥 Firebase
-import {
-  collection,
-  addDoc,
-  deleteDoc,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+import {collection,addDoc,deleteDoc,query,where,getDocs,} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getAuth } from "firebase/auth";
 
 
-// Tabs
 const TABS = ["All", "Student", "Family"];
 
 const filterProperties = (
@@ -73,7 +56,6 @@ export default function Listings() {
   const auth = getAuth();
   const userId = auth.currentUser?.uid;
 
-  // 🔥 fetch favorites
   const fetchFavorites = async () => {
     if (!userId) return;
 
@@ -96,7 +78,6 @@ export default function Listings() {
   }, [userId]);
 
 
-  // ❤️ toggle favorite
   const toggleFavorite = useCallback(async (propertyId: string) => {
     if (!userId) return;
 
@@ -158,7 +139,6 @@ export default function Listings() {
         />
       </View>
 
-      {/* 🟢 Tabs */}
       <View style={styles.tabs}>
         {TABS.map((tab) => (
           <Pressable
@@ -184,7 +164,6 @@ export default function Listings() {
         ))}
       </View>
 
-      {/* 📦 List */}
       <FlatList
         data={filteredProperties}
         keyExtractor={(item) => item.id}
@@ -211,7 +190,6 @@ export default function Listings() {
 }
 
 
-// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
