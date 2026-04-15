@@ -10,6 +10,7 @@ type InputFieldProps = {
   rightElement?: React.ReactNode;
   value?: string;
   onChangeText?: (text: string) => void;
+  error?: string;
   
 };
 export default function InputField({
