@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 export default function useProperties() {
   const [properties, setProperties] = useState<any[]>([]);
-
+ 
   useEffect(() => {
     setProperties([
       {

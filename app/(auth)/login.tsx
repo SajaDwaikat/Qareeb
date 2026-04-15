@@ -11,9 +11,14 @@ import Checkbox from "expo-checkbox";
 import { Linking } from "react-native";
 import Logo from "@/components/ui/Logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
+
 import { auth, db } from "../../lib/firebase";
 import { useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
+
+
+
+
 
 const size = 60;
 export default function Login() {
@@ -47,9 +52,7 @@ export default function Login() {
       return;
     }
 
-    //if (stayLoggedIn){
-      //await AsyncStorage.setItem("stayLoggedIn", "true")
-    //}
+
 
     try {
 
@@ -61,7 +64,7 @@ export default function Login() {
 
       const user = userCredential.user;
 
-// 🔥 Fetch user data from Firestore
+
       const docRef = doc(db, "user", user.uid);
       const docSnap = await getDoc(docRef);
 
@@ -76,6 +79,22 @@ export default function Login() {
       } else {
         console.log("No user data found");
       }
+
+    } catch (error: any) {
+      console.log("ERROR CODE:", error.code);
+
+      let errorMessage = "Login failed. Try again.";
+
+      switch (error.code) {
+        case "auth/user-not-found":
+        case "auth/invalid-credential":
+          errorMessage = "No account found with this email";
+          break;
+
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password";
+          break;
+
 
     } catch (error: any) {
       console.log("ERROR CODE:", error.code);
