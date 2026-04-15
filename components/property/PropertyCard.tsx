@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Image, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function PropertyCard({
   property,
@@ -20,8 +21,9 @@ export default function PropertyCard({
         <Image source={{ uri: property.image }} style={styles.image} />
 
         <View style={styles.rating}>
+          <Ionicons name="star" size={14} color="#f5a623" />
           <Text style={styles.ratingText}>
-            ⭐ {property.rating || 4.5}
+            {property.rating || 4.5}
           </Text>
         </View>
 
@@ -30,9 +32,11 @@ export default function PropertyCard({
             style={styles.favorite}
             onPress={onToggleFavorite}
           >
-            <Text style={{ fontSize: 16 }}>
-              {isFavorite ? "❤️" : "🤍"}
-            </Text>
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={18}
+              color={isFavorite ? "red" : "#333"}
+            />
           </Pressable>
         )}
       </View>
@@ -45,19 +49,30 @@ export default function PropertyCard({
 
         <Text style={styles.title}>{property.title}</Text>
 
-        <Text style={styles.location}>
-          📍 {property.location || "Nablus"}
-        </Text>
-
-        <View style={styles.row}>
-          <Text style={styles.detail}>
-            🛏 {property.beds || 2} Rooms
-          </Text>
-          <Text style={styles.detail}>
-            🛁 {property.baths || 2} Baths
+        <View style={styles.rowInline}>
+          <Ionicons name="location-outline" size={14} color="#777" />
+          <Text style={styles.location}>
+            {property.location || "Nablus"}
           </Text>
         </View>
 
+        <View style={styles.row}>
+          <View style={styles.rowInline}>
+            <Ionicons name="bed-outline" size={14} color="#555" />
+            <Text style={styles.detail}>
+              {property.beds || 2} Rooms
+            </Text>
+          </View>
+
+          <View style={styles.rowInline}>
+            <Ionicons name="water-outline" size={14} color="#555" />
+            <Text style={styles.detail}>
+              {property.baths || 2} Baths
+            </Text>
+          </View>
+        </View>
+
+        {/* Button */}
         <Pressable style={styles.button} onPress={handlePress}>
           <Text style={styles.buttonText}>View Details</Text>
         </Pressable>
@@ -139,6 +154,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#555",
   },
+  rowInline: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+},
 
   button: {
     marginTop: 16,

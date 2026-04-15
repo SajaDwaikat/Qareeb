@@ -1,20 +1,41 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import {collection,getDocs,query, where,orderBy,} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
-export default function useFirebaseProperties() {
+export default function useFirebaseProperties(type?: string) {
   const [properties, setProperties] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProperties = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "properties"));
+      let q;
+
+      if (type === "top") {
+        q = query(
+          collection(db, "properties"),
+          where("rating", ">=", 4.5),
+          orderBy("rating", "desc")
+        );
+      }
+      else if (type && type !== "All") {
+        q = query(
+          collection(db, "properties"),
+          where("type", "==", type.toLowerCase())
+        );
+      }
+      else {
+        q = collection(db, "properties");
+      }
+
+      const snapshot = await getDocs(q);
 
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
+        
       }));
 
+     
       setProperties(data);
     } catch (error) {
       console.log("Error fetching:", error);
@@ -25,7 +46,7 @@ export default function useFirebaseProperties() {
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+  }, [type]);
 
   return { properties, loading };
 }

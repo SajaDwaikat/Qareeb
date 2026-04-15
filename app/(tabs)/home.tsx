@@ -4,22 +4,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import useProperties from "@/hooks/useProperties";
 import PropertyCard from "@/components/property/PropertyCard";
-import Header from "@/components/ui/Header";
 import { ActivityIndicator } from "react-native";
 import useFirebaseProperties from "@/hooks/useFirebaseProperties";
+import { Ionicons } from "@expo/vector-icons";
 
 
 const { width, height } = Dimensions.get("window");
 
-
-
 export default function Home() {
-  const { properties, loading } = useFirebaseProperties();
+const { properties, loading } = useFirebaseProperties("top");
   const tabHeight = useBottomTabBarHeight();
-
-  const topRatedProperties = properties.filter(
-  (item) => item.rating >= 4.5
-);
 
  if (loading) {
   return (
@@ -38,13 +32,14 @@ export default function Home() {
         style={styles.bg}
       />
 
-     
       <View style={styles.overlay} />
 
       <SafeAreaView style={styles.safe}>
         
-        <Header title=" 📍 Nablus Horizon" />
-
+<View style={styles.header}>
+  <Ionicons name="location-sharp" size={20} color="#007AFF" />
+  <Text style={styles.headerText}>Nablus Horizon</Text>
+</View>
        
         <View style={styles.centerText}>
           <Text style={styles.title}>Qareeb</Text>
@@ -58,7 +53,7 @@ export default function Home() {
           <Text style={styles.badge}>FEATURED IN NABLUS</Text>
 
           <FlatList
-            data={topRatedProperties}
+            data={properties}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id.toString()}
@@ -91,48 +86,33 @@ const styles = StyleSheet.create({
   pointerEvents: "none", 
 },
 
-  safe: { flex: 1 },
+safe: {
+   flex: 1
+   },
 
 
-  header: {
-    marginTop: 10,
-    marginHorizontal: 16,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    paddingVertical: 10,
-    paddingHorizontal: 14,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-  },
+header: {
+  marginTop: 10,
+  marginHorizontal: 16,
+  padding: 14,
+  borderRadius: 18,
+  backgroundColor: "#fff",
+  flexDirection: "row",
+  alignItems: "center",
+  shadowColor: "#000",
+  shadowOpacity: 0.08,
+  shadowRadius: 8,
+  elevation: 4,
+},
 
-  headerContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
+headerText: {
+  fontSize: 18,
+  fontWeight: "800",
+  color: "#222",
+  marginLeft: 8, 
+},
 
-  icon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#e6f0ff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  iconText: {
-    fontSize: 14,
-  },
-
-  headerText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#333",
-  },
-
- 
+  
   centerText: {
     position: "absolute",
     top: height * 0.15,
