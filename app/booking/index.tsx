@@ -89,7 +89,7 @@ export default function Booking() {
           style={[styles.input, { height: 90 }]}
           multiline
         />
-
+        
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>
             Confirm Booking →
