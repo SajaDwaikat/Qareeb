@@ -98,7 +98,7 @@ export default function useProperties() {
     ]);
   }, []);
 
-  // 🔥 Top Rated (Top 10)
+
   const topRatedProperties = properties
     .filter((p) => p.rating >= 4.5)
     .sort((a, b) => b.rating - a.rating)
