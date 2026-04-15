@@ -1,13 +1,12 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import {ScrollView, StyleSheet, Text, View, Pressable} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import InputField from "../../components/ui/InputField";
 import Button from "../../components/ui/Button";
 import { router, useLocalSearchParams } from "expo-router";
-import Header from "@/components/ui/Header";
 import Card from "@/components/ui/AuthCard";
 import Logo from "@/components/ui/Logo";
+import React from "react";
+import Header from "@/components/ui/Header";
 
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
@@ -80,7 +79,14 @@ export default function Signup() {
         name,
         email,
         PhoneNum,
+        role,
         createdAt: new Date(),
+      });
+
+
+      router.replace({
+        pathname: "/(auth)/login",
+        params: {role},
       });
 
       if (role === "User"){
@@ -266,5 +272,7 @@ copy:{
     color:"#aaa",
     fontSize:10,
   },
+
 });
+
 
