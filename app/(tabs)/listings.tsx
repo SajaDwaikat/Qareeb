@@ -9,6 +9,7 @@ import Header from "@/components/ui/Header";
 import {collection,addDoc,deleteDoc,query,where,getDocs,} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { getAuth } from "firebase/auth";
+import { Alert } from "react-native";
 
 
 const TABS = ["All", "Student", "Family"];
@@ -77,33 +78,49 @@ export default function Listings() {
     fetchFavorites();
   }, [userId]);
 
+const toggleFavorite = useCallback(async (propertyId: string) => {
+  if (!userId) return;
 
-  const toggleFavorite = useCallback(async (propertyId: string) => {
-    if (!userId) return;
+  const isFav = favorites.includes(propertyId);
 
-    const q = query(
-      collection(db, "favorites"),
-      where("userId", "==", userId),
-      where("propertyId", "==", propertyId)
-    );
+  Alert.alert(
+    isFav ? "Remove Favorite" : "Add to Favorites",
+    isFav
+      ? "Are you sure you want to remove this property from favorites?"
+      : "Do you want to add this property to your favorites?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: async () => {
+          const q = query(
+            collection(db, "favorites"),
+            where("userId", "==", userId),
+            where("propertyId", "==", propertyId)
+          );
 
-    const snapshot = await getDocs(q);
+          const snapshot = await getDocs(q);
 
-    if (!snapshot.empty) {
-      snapshot.forEach(async (docItem) => {
-        await deleteDoc(docItem.ref);
-      });
-    } else {
-      await addDoc(collection(db, "favorites"), {
-        userId,
-        propertyId,
-      });
-    }
+          if (!snapshot.empty) {
+            snapshot.forEach(async (docItem) => {
+              await deleteDoc(docItem.ref);
+            });
+          } else {
+            await addDoc(collection(db, "favorites"), {
+              userId,
+              propertyId,
+            });
+          }
 
-    fetchFavorites();
-  }, [userId]);
-
-
+          fetchFavorites(); 
+        },
+      },
+    ]
+  );
+}, [userId, favorites]);
   const filteredProperties = useMemo(() => {
     return filterProperties(properties, selectedTab, search);
   }, [properties, selectedTab, search]);
