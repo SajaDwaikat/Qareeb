@@ -11,11 +11,13 @@ import Checkbox from "expo-checkbox";
 import { Linking } from "react-native";
 import Logo from "@/components/ui/Logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth,} from "../../lib/firebase";
-
+import { auth, db } from "../../lib/firebase";
+import { useLocalSearchParams } from "expo-router";
+import { doc, getDoc } from "firebase/firestore";
 
 const size = 60;
 export default function Login() {
+  const {role} = useLocalSearchParams();
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -57,9 +59,23 @@ export default function Login() {
         password
       );
 
-      console.log("Logged in:", userCredential.user.email);
+      const user = userCredential.user;
 
-      router.replace("/(tabs)/home");
+// 🔥 Fetch user data from Firestore
+      const docRef = doc(db, "user", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+
+        if (userData.role === "User") {
+          router.replace("/(tabs)/home");
+        } else {
+          router.replace("/(owner-tabs)/owner-dashboard");
+        }
+      } else {
+        console.log("No user data found");
+      }
 
     } catch (error: any) {
       console.log("ERROR CODE:", error.code);
