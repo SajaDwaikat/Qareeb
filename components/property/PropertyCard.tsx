@@ -72,7 +72,6 @@ export default function PropertyCard({
           </View>
         </View>
 
-        {/* Button */}
         <Pressable style={styles.button} onPress={handlePress}>
           <Text style={styles.buttonText}>View Details</Text>
         </Pressable>
