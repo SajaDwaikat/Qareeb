@@ -1,35 +1,66 @@
-import React, { useState, useMemo, useCallback } from "react";
-import {View,Text,StyleSheet,TextInput,FlatList,Pressable,ActivityIndicator,Alert,} from "react-native";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  FlatList,
+  Pressable,
+  ActivityIndicator,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import useFirebaseProperties from "@/hooks/useFirebaseProperties";
 import PropertyCard from "@/components/property/PropertyCard";
 import Header from "@/components/ui/Header";
 
+// 🔥 Firebase
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { getAuth } from "firebase/auth";
 
+
+// Tabs
 const TABS = ["All", "Student", "Family"];
+
 const filterProperties = (
   properties: any[],
   selectedTab: string,
   search: string
 ) => {
   const searchValue = search.trim().toLowerCase();
+
   const isNumber = searchValue !== "" && !isNaN(Number(searchValue));
 
   return properties.filter((item) => {
+    const title = item.title?.toLowerCase() || "";
+    const location = item.location?.toLowerCase() || "";
+    const type = item.type?.toLowerCase() || "";
+
     const matchesTab =
       selectedTab === "All" ||
-      item.type === selectedTab.toLowerCase();
+      type === selectedTab.toLowerCase();
 
     const matchesSearch =
       searchValue === "" ||
       (isNumber
         ? item.price <= Number(searchValue)
-        : item.title.toLowerCase().includes(searchValue) ||
-          item.location.toLowerCase().includes(searchValue));
+        : title.includes(searchValue) ||
+          location.includes(searchValue) ||
+          type.includes(searchValue));
 
     return matchesTab && matchesSearch;
   });
 };
+
+
 
 
 export default function Listings() {
@@ -39,23 +70,63 @@ export default function Listings() {
   const [search, setSearch] = useState("");
   const [favorites, setFavorites] = useState<string[]>([]);
 
+  const auth = getAuth();
+  const userId = auth.currentUser?.uid;
+
+  // 🔥 fetch favorites
+  const fetchFavorites = async () => {
+    if (!userId) return;
+
+    const q = query(
+      collection(db, "favorites"),
+      where("userId", "==", userId)
+    );
+
+    const snapshot = await getDocs(q);
+
+    const favIds = snapshot.docs.map(
+      (doc) => doc.data().propertyId
+    );
+
+    setFavorites(favIds);
+  };
+
+  useEffect(() => {
+    fetchFavorites();
+  }, [userId]);
+
+
+  // ❤️ toggle favorite
+  const toggleFavorite = useCallback(async (propertyId: string) => {
+    if (!userId) return;
+
+    const q = query(
+      collection(db, "favorites"),
+      where("userId", "==", userId),
+      where("propertyId", "==", propertyId)
+    );
+
+    const snapshot = await getDocs(q);
+
+    if (!snapshot.empty) {
+      snapshot.forEach(async (docItem) => {
+        await deleteDoc(docItem.ref);
+      });
+    } else {
+      await addDoc(collection(db, "favorites"), {
+        userId,
+        propertyId,
+      });
+    }
+
+    fetchFavorites();
+  }, [userId]);
+
+
   const filteredProperties = useMemo(() => {
     return filterProperties(properties, selectedTab, search);
   }, [properties, selectedTab, search]);
 
-  const toggleFavorite = useCallback((id: string) => {
-    setFavorites((prev) => {
-      const isFav = prev.includes(id);
-
-      if (!isFav) {
-        Alert.alert("❤️ Added", "Added to favorites");
-      }
-
-      return isFav
-        ? prev.filter((f) => f !== id)
-        : [...prev, id];
-    });
-  }, []);
 
   if (loading) {
     return (
@@ -65,19 +136,21 @@ export default function Listings() {
     );
   }
 
+
   return (
     <SafeAreaView style={styles.container}>
-      
       <Header title="Qareeb" />
 
+      {/* Title */}
       <Text style={styles.title}>Find your space in Nablus</Text>
       <Text style={styles.subtitle}>
-        From student dorms in Rafidia to family estates.
+        Explore the best places around you
       </Text>
 
+      {/* 🔍 Search */}
       <View style={styles.searchBox}>
         <TextInput
-          placeholder="Search by area or property type..."
+          placeholder="Search by location or price..."
           value={search}
           onChangeText={setSearch}
           style={styles.input}
@@ -85,13 +158,14 @@ export default function Listings() {
         />
       </View>
 
+      {/* 🟢 Tabs */}
       <View style={styles.tabs}>
         {TABS.map((tab) => (
           <Pressable
             key={tab}
             onPress={() => {
               setSelectedTab(tab);
-              setSearch(""); // reset search
+              setSearch("");
             }}
             style={[
               styles.tab,
@@ -110,6 +184,7 @@ export default function Listings() {
         ))}
       </View>
 
+      {/* 📦 List */}
       <FlatList
         data={filteredProperties}
         keyExtractor={(item) => item.id}
@@ -127,7 +202,7 @@ export default function Listings() {
         )}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No results found</Text>
+            <Text style={styles.emptyText}>No properties found</Text>
           </View>
         }
       />
@@ -136,6 +211,7 @@ export default function Listings() {
 }
 
 
+// 🎨 Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -158,14 +234,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     backgroundColor: "#fff",
     borderRadius: 25,
-    padding: 3,
-    marginBottom: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 10,
     marginHorizontal: 20,
+    elevation: 2,
   },
 
   input: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 5,
     color: "#000",
   },
 
@@ -176,8 +254,8 @@ const styles = StyleSheet.create({
   },
 
   tab: {
-    paddingVertical: 7,
-    paddingHorizontal: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     backgroundColor: "#eee",
     borderRadius: 20,
     marginRight: 8,
@@ -189,6 +267,7 @@ const styles = StyleSheet.create({
 
   tabText: {
     fontSize: 14,
+    fontWeight: "500",
   },
 
   activeText: {
