@@ -79,15 +79,13 @@ export default function Signup() {
         createdAt: new Date(),
       });
 
-      router.replace("/(auth)/user-type");
+      router.replace("/(auth)/login");
 
     } catch (error: any) {
       let message = "Something went wrong";
-
       if (error.code === "auth/email-already-in-use") {
         message = "Email already in use";
       }
-
       setErrors((prev) => ({ ...prev, email: message }));
     }
   };
