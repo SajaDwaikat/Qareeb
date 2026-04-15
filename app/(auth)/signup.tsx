@@ -1,14 +1,11 @@
-import { Ionicons } from "@expo/vector-icons";
-import React from "react";
 import {ScrollView, StyleSheet, Text, View, Pressable} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import InputField from "../../components/ui/InputField";
 import Button from "../../components/ui/Button";
 import { router, useLocalSearchParams } from "expo-router";
-import Header from "@/components/ui/Header";
 import Card from "@/components/ui/AuthCard";
 import Logo from "@/components/ui/Logo";
-
+import React from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -80,15 +77,14 @@ export default function Signup() {
         name,
         email,
         PhoneNum,
+        role,
         createdAt: new Date(),
       });
 
-      if (role === "User"){
-        router.replace("/(tabs)/home");
-      } else {
-        router.replace("/(owner-tabs)/owner-dashboard");
-      }
-
+      router.replace({
+        pathname: "/(auth)/login",
+        params: {role},
+      });
 
     } catch (error: any) {
       let message = "Something went wrong";
@@ -267,4 +263,3 @@ copy:{
     fontSize:10,
   },
 });
-
