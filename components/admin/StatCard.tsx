@@ -1,41 +1,42 @@
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { Text } from "react-native-paper";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import { Card, Icon, Text } from "react-native-paper";
-import { StyleSheet, View } from "react-native";
+interface Props {
+  title: string;
+  value: number;
+  icon: any;
+}
 
-export default function StatCard({ title, value, icon }) {
+export default function StatCard({ title, value, icon }: Props) {
   return (
-    <Card style={styles.card}>
-      <Card.Content style={styles.row} >
-        <View>
-          <Icon source={icon} size={32} />
-          <Text variant="titleMedium">{title}</Text>
-        </View>
-        <View>
-        
-        <Text variant="headlineMedium" style={styles.value}>
-          {value}
-        </Text>
-        </View>
-      </Card.Content>
-    </Card>
+    <View style={styles.card}>
+      <MaterialCommunityIcons name={icon} size={28} color="#0A66C2" />
+
+      <Text style={styles.value}>{value}</Text>
+      <Text style={styles.title}>{title}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    margin: 8,
     flex: 1,
-    borderRadius: 12,
-    elevation: 3,
-    backgroundColor: "#DBE1FF",
-  },
-   row: {
-    flexDirection: "row",
+    backgroundColor: "#fff",
+    margin: 5,
+    padding: 16,
+    borderRadius: 16,
     alignItems: "center",
+    elevation: 3,
   },
   value: {
-    marginTop: 10,
+    fontSize: 20,
     fontWeight: "bold",
-    marginLeft: 30,
+    marginTop: 8,
+  },
+  title: {
+    color: "#777",
+    marginTop: 4,
   },
 });
