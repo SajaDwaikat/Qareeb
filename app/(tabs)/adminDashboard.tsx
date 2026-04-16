@@ -1,29 +1,24 @@
 import React from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { Text } from "react-native-paper";
-import StatCard from "../../components/admin/StatCard";
-import PropertyRequestCard from "../../components/admin/PropertyRequestCard";
+
+import StatCard from "@/components/admin/StatCard";
+import PropertyRequestCard from "@/components/admin/PropertyRequestCard";
+import usePendingProperties from "@/hooks/usePendingProperties";
+import { approveProperty, rejectProperty } from "@/services/propertyService";  
+import useAdminStats from "@/hooks/useAdminStats";
 
 export default function AdminDashboardScreen() {
- 
-  const stats = {
-    users: 120,
-    owners: 40,
-    renters: 80,
-    properties: 55,
+  const { requests } = usePendingProperties();
+
+  const { stats } = useAdminStats();
+
+  const handleAccept = async (id: string) => {
+    await approveProperty(id);
   };
 
-  const requests = [
-    { id: 1, title: "Apartment in Nablus", location: "Rafidia" },
-    { id: 2, title: "Villa", location: "Beit Wazan" },
-  ];
-
-  const handleAccept = (id) => {
-    console.log("Accepted:", id);
-  };
-
-  const handleReject = (id) => {
-    console.log("Rejected:", id);
+  const handleReject = async (id: string) => {
+    await rejectProperty(id);
   };
 
   return (
@@ -32,10 +27,9 @@ export default function AdminDashboardScreen() {
         Admin Dashboard
       </Text>
 
-     
       <View style={styles.statsRow}>
-        <StatCard title="Users" value={stats.users} icon="account-group"/>
-        <StatCard title="Properties" value={stats.properties} icon="home-city"/>
+        <StatCard title="Users" value={stats.users} icon="account-group" />
+        <StatCard title="Properties" value={stats.properties} icon="home-city" />
       </View>
 
       <View style={styles.statsRow}>
@@ -43,14 +37,13 @@ export default function AdminDashboardScreen() {
         <StatCard title="Renters" value={stats.renters} icon="account" />
       </View>
 
-  
       <Text variant="titleLarge" style={styles.section}>
         Property Requests
       </Text>
 
       <FlatList
         data={requests}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <PropertyRequestCard
             item={item}
@@ -66,16 +59,17 @@ export default function AdminDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    padding: 16,
   },
   header: {
     marginTop: 40,
-    marginBottom: 15,
+    marginBottom: 20,
     fontWeight: "bold",
   },
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    marginBottom: 10,
   },
   section: {
     marginTop: 20,
