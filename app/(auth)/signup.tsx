@@ -6,8 +6,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import Card from "@/components/ui/AuthCard";
 import Logo from "@/components/ui/Logo";
 import React from "react";
-import Header from "@/components/ui/Header";
-
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -83,18 +81,10 @@ export default function Signup() {
         createdAt: new Date(),
       });
 
-
       router.replace({
         pathname: "/(auth)/login",
         params: {role},
       });
-
-      if (role === "User"){
-        router.replace("/(tabs)/home");
-      } else {
-        router.replace("/(owner-tabs)/owner-dashboard");
-      }
-
 
     } catch (error: any) {
       let message = "Something went wrong";
@@ -272,7 +262,4 @@ copy:{
     color:"#aaa",
     fontSize:10,
   },
-
 });
-
-
