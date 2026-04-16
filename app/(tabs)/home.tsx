@@ -9,7 +9,6 @@ import useApprovedProperties from "@/hooks/useApprovedProperties";
 
 
 const { width, height } = Dimensions.get("window");
-
 export default function Home() {
   const { properties, loading } = useApprovedProperties();
   const tabHeight = useBottomTabBarHeight();
