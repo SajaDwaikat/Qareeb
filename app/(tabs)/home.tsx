@@ -2,7 +2,6 @@ import React from "react";
 import {View,Text,FlatList,StyleSheet,Image,Dimensions,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import useProperties from "@/hooks/useProperties";
 import PropertyCard from "@/components/property/PropertyCard";
 import { ActivityIndicator } from "react-native";
 import useFirebaseProperties from "@/hooks/useFirebaseProperties";
@@ -10,7 +9,6 @@ import { Ionicons } from "@expo/vector-icons";
 
 
 const { width, height } = Dimensions.get("window");
-
 export default function Home() {
 const { properties, loading } = useFirebaseProperties("top");
   const tabHeight = useBottomTabBarHeight();
