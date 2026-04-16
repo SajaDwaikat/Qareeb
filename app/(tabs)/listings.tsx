@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {View,Text,StyleSheet,TextInput,FlatList,Pressable,ActivityIndicator,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import useFirebaseProperties from "@/hooks/useFirebaseProperties";
+import useApprovedProperties from "@/hooks/useApprovedProperties";
 import PropertyCard from "@/components/property/PropertyCard";
 import Header from "@/components/ui/Header";
 
@@ -48,7 +48,7 @@ const filterProperties = (
 
 
 export default function Listings() {
-  const { properties, loading } = useFirebaseProperties();
+  const { properties, loading } = useApprovedProperties();
 
   const [selectedTab, setSelectedTab] = useState("All");
   const [search, setSearch] = useState("");
