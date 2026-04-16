@@ -6,16 +6,12 @@ import StatCard from "@/components/admin/StatCard";
 import PropertyRequestCard from "@/components/admin/PropertyRequestCard";
 import usePendingProperties from "@/hooks/usePendingProperties";
 import { approveProperty, rejectProperty } from "@/services/propertyService";  
+import useAdminStats from "@/hooks/useAdminStats";
 
 export default function AdminDashboardScreen() {
   const { requests } = usePendingProperties();
 
-  const stats = {
-    users: 120,
-    owners: 40,
-    renters: 80,
-    properties: 55,
-  };
+  const { stats } = useAdminStats();
 
   const handleAccept = async (id: string) => {
     await approveProperty(id);
