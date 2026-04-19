@@ -14,6 +14,8 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
 import { useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const size = 60;
 export default function Login() {
@@ -47,10 +49,6 @@ export default function Login() {
       return;
     }
 
-    //if (stayLoggedIn){
-      //await AsyncStorage.setItem("stayLoggedIn", "true")
-    //}
-
     try {
 
       const userCredential = await signInWithEmailAndPassword(
@@ -60,8 +58,11 @@ export default function Login() {
       );
 
       const user = userCredential.user;
+        if (stayLoggedIn){
+          await AsyncStorage.setItem("stayLoggedIn", "true");
+          await AsyncStorage.setItem("user", JSON.stringify(user))
+        }
 
-// 🔥 Fetch user data from Firestore
       const docRef = doc(db, "user", user.uid);
       const docSnap = await getDoc(docRef);
 
