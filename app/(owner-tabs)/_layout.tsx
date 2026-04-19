@@ -1,5 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet } from "react-native";
 
 export default function OwnerTabsLayout() {
   return (
@@ -8,17 +9,8 @@ export default function OwnerTabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: "#2563EB",
         tabBarInactiveTintColor: "#98A2B3",
-        tabBarStyle: {
-          height: 74,
-          paddingTop: 8,
-          paddingBottom: 10,
-          borderTopWidth: 0,
-          backgroundColor: "#FFFFFF",
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: "500",
-        },
+        tabBarStyle: styles.tabBar,
+        tabBarLabelStyle: styles.tabBarLabel,
       }}
     >
       <Tabs.Screen
@@ -53,3 +45,17 @@ export default function OwnerTabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  tabBar: {
+    height: 74,
+    paddingTop: 8,
+    paddingBottom: 10,
+    borderTopWidth: 0,
+    backgroundColor: "#FFFFFF",
+  },
+  tabBarLabel: {
+    fontSize: 11,
+    fontWeight: "500",
+  },
+});
