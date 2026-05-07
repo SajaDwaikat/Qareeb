@@ -1,42 +1,241 @@
-import React, { useState } from "react";
-import {View,Text,StyleSheet,TextInput,Pressable,ScrollView,} from "react-native";
+import React, { useRef, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import {View,Text,StyleSheet,TextInput,Pressable,ScrollView,Image,Alert,ActivityIndicator,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Header from "@/components/ui/Header";
+import {CameraView,useCameraPermissions,} from "expo-camera";
+import {ref,uploadBytes,getDownloadURL,} from "firebase/storage";
+import {addDoc,collection,serverTimestamp,} from "firebase/firestore";
+import { db, storage } from "../../lib/firebase";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Booking() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [notes, setNotes] = useState("");
+const {title,location,price,image,propertyId,} = useLocalSearchParams();
+  const [cameraPermission, requestCameraPermission] =
+    useCameraPermissions();
+  const cameraRef = useRef<any>(null);
+  const [photo, setPhoto] =
+    useState<string | null>(null);
+  const [showCamera, setShowCamera] =
+    useState<boolean>(false);
+  const [loading, setLoading] =
+    useState<boolean>(false);
+  const openCamera = async () => {
+    if (!cameraPermission?.granted) {
+      await requestCameraPermission();
+    }
+
+    setShowCamera(true);
+  };
+
+  const takePhoto = async () => {
+    try {
+      if (cameraRef.current) {
+        const photoData =
+          await cameraRef.current.takePictureAsync();
+
+        setPhoto(photoData.uri);
+
+        setShowCamera(false);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!photo) return null;
+
+    const response = await fetch(photo);
+
+    const blob = await response.blob();
+
+    const fileName =
+      `bookingIDs/${Date.now()}.jpg`;
+
+    const storageRef =
+      ref(storage, fileName);
+
+    await uploadBytes(storageRef, blob);
+
+    const imageUrl =
+      await getDownloadURL(storageRef);
+
+    return imageUrl;
+  };
+
+  const handleBooking = async () => {
+  try {
+
+    if (!name || !phone || !idNumber) {
+      Alert.alert(
+        "Missing Information",
+        "Please fill all required fields."
+      );
+
+      return;
+    }
+
+    if (idNumber.length !== 9) {
+      Alert.alert(
+        "Invalid ID Number",
+        "ID number must contain exactly 9 digits."
+      );
+
+      return;
+    }
+
+    // if (!photo) {
+    //   Alert.alert(
+    //     "ID Required",
+    //     "Please upload a photo of your ID."
+    //   );
+
+    //   return;
+    // }
+
+    // setLoading(true);
+
+    // const imageUrl =
+    //   await uploadImage();
+    const imageUrl = null;
+
+    await addDoc(
+      collection(db, "bookings"),
+      {
+        propertyId,apartmentName: title,
+        location,price,
+        propertyImage: image,
+        name,phone,idNumber,notes,
+        idImage: imageUrl,
+        status: "pending",
+        createdAt:
+          serverTimestamp(),
+      }
+    );
+
+    Alert.alert(
+      "Request Submitted",
+      "Your booking request has been sent successfully. You will receive a notification once it is confirmed."
+    );
+
+    setName("");
+    setPhone("");
+    setIdNumber("");
+    setNotes("");
+    setPhoto(null);
+
+  } catch (error) {
+
+    console.log(
+      "BOOKING ERROR:",
+      error
+    );
+
+    Alert.alert(
+      "Error",
+      "Something went wrong. Please try again."
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
+
+  if (showCamera) {
+    return (
+      <View style={{ flex: 1 }}>
+        <CameraView
+          ref={cameraRef}
+          style={{ flex: 1 }}
+          facing="back"
+        />
+
+        <Pressable
+          onPress={takePhoto}
+          style={styles.captureButton}
+        >
+          <Ionicons
+            name="camera"
+            size={30}
+            color="#000"
+          />
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        
-        <Text style={styles.title}>Book Your Apartment</Text>
+      <Header title="Book Your Apartment" />
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+      >
+       
+
         <Text style={styles.subtitle}>
-          Secure your stay in Nablus with our seamless booking process
+          Secure your stay in Nablus with
+          our seamless booking process
         </Text>
 
         <View style={styles.card}>
-          <View style={styles.image} />
-          <View>
-            <Text style={styles.cardTitle}>
-              Luxury Skyline Suite
-            </Text>
-            <Text style={styles.location}>
-              📍 Rafidia, Nablus
-            </Text>
-            <Text style={styles.price}>
-              ₪4,500 <Text style={styles.per}>/ month</Text>
-            </Text>
-          </View>
-        </View>
+  <Image
+    source={{
+      uri:
+        image as string ||
+        "https://via.placeholder.com/150",
+    }}
+    style={styles.image}
+  />
+
+  <View style={{ flex: 1 }}>
+    <Text style={styles.cardTitle}>
+      {title || "Apartment"}
+    </Text>
+
+   <View style={styles.locationRow}>
+  <Ionicons
+    name="location"
+    size={16}
+    color="#777"
+  />
+  <Text style={styles.location}>
+    {location}
+  </Text>
+</View>
+
+   <View style={styles.priceRow}>
+  <Ionicons
+    name="cash-outline"
+    size={18}
+    color="#007AFF"
+  />
+
+  <Text style={styles.price}>
+    ₪{price}
+
+    <Text style={styles.per}>
+      {" "}
+      / month
+    </Text>
+  </Text>
+</View>
+</View>
+</View>
 
         <Text style={styles.sectionTitle}>
-          1  Personal Details
+          1 Personal Details
         </Text>
 
-        <Text style={styles.label}>Full Name</Text>
+        <Text style={styles.label}>
+          Full Name
+        </Text>
+
         <TextInput
           placeholder="John Doe"
           value={name}
@@ -44,7 +243,10 @@ export default function Booking() {
           style={styles.input}
         />
 
-        <Text style={styles.label}>Phone Number</Text>
+        <Text style={styles.label}>
+          Phone Number
+        </Text>
+
         <TextInput
           placeholder="+970 59-XXXXXXX"
           value={phone}
@@ -54,52 +256,99 @@ export default function Booking() {
         />
 
         <Text style={styles.sectionTitle}>
-          2  Identity Verification
+          2 Identity Verification
         </Text>
 
-        <Text style={styles.label}>ID Number</Text>
+        <Text style={styles.label}>
+          ID Number
+        </Text>
+
         <TextInput
-          placeholder="Enter ID or Passport Number"
-          value={idNumber}
-          onChangeText={setIdNumber}
-          style={styles.input}
+        placeholder="Enter ID or Passport Number"
+        value={idNumber}
+        onChangeText={(text) => {
+          const cleaned =
+          text.replace(/[^0-9]/g, "");
+          if (cleaned.length <= 9) {
+            setIdNumber(cleaned);
+          }
+        }}
+        style={styles.input}
+        keyboardType="numeric"
+        maxLength={9}
         />
 
-        <View style={styles.uploadBox}>
-          <Text style={styles.uploadText}>Upload Photo of ID</Text>
-          <Text style={styles.uploadSub}>PNG, JPG up to 10MB</Text>
-        </View>
+        <Pressable
+          style={styles.uploadBox}
+          onPress={openCamera}
+        >
+          {photo ? (
+            <>
+              <Image
+                source={{ uri: photo }}
+                style={styles.previewImage}
+              />
+
+              <Text style={styles.retake}>
+                Tap to retake photo
+              </Text>
+            </>
+          ) : (
+            <>
+              <Ionicons
+                name="camera-outline"
+                size={34}
+                color="#007AFF"
+              />
+
+              <Text style={styles.uploadText}>
+                Upload Photo of ID
+              </Text>
+
+              <Text style={styles.uploadSub}>
+                PNG, JPG up to 10MB
+              </Text>
+            </>
+          )}
+        </Pressable>
 
         <Text style={styles.sectionTitle}>
-          3  Stay Details
+          3 Stay Details
         </Text>
 
-        <Text style={styles.label}>Stay Duration</Text>
-        <View style={styles.input}>
-          <Text style={{ color: "#999" }}>
-            Select duration
-          </Text>
-        </View>
+        <Text style={styles.label}>
+          Additional Notes
+        </Text>
 
-        <Text style={styles.label}>Additional Notes</Text>
         <TextInput
           placeholder="Any specific requirements..."
           value={notes}
           onChangeText={setNotes}
-          style={[styles.input, { height: 90 }]}
+          style={[
+            styles.input,
+            { height: 90 },
+          ]}
           multiline
         />
-        
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>
-            Confirm Booking →
-          </Text>
-        </Pressable>
 
+        <Pressable
+          style={styles.button}
+          onPress={handleBooking}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>
+              Submit Booking Request →
+            </Text>
+          )}
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -108,101 +357,147 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: "800",
   },
 
   subtitle: {
     color: "#777",
-    marginBottom: 15,
+    marginBottom: 20,
+    marginTop: 4,
   },
 
   card: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 20,
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 24,
     alignItems: "center",
   },
 
   image: {
-    width: 70,
-    height: 70,
-    backgroundColor: "#ddd",
-    borderRadius: 10,
-    marginRight: 10,
-  },
+  width: 75,
+  height: 75,
+  borderRadius: 12,
+  marginRight: 12,
+  backgroundColor: "#ddd",
+},
 
   cardTitle: {
     fontWeight: "700",
+    fontSize: 16,
   },
 
-  location: {
-    color: "#777",
-    fontSize: 12,
-  },
 
-  price: {
-    color: "#007AFF",
-    fontWeight: "800",
-  },
-
+ 
   per: {
     color: "#777",
-    fontSize: 12,
+    fontSize: 13,
   },
 
   sectionTitle: {
     fontWeight: "700",
-    marginBottom: 10,
-    marginTop: 10,
+    marginBottom: 12,
+    marginTop: 12,
+    fontSize: 16,
   },
 
   label: {
-    marginBottom: 5,
+    marginBottom: 6,
     color: "#444",
+    fontWeight: "500",
   },
 
   input: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 15,
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 18,
   },
 
   uploadBox: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: 14,
+    padding: 24,
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 24,
     borderStyle: "dashed",
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: "#ccc",
   },
 
   uploadText: {
-    fontWeight: "600",
+    fontWeight: "700",
+    marginTop: 10,
   },
 
   uploadSub: {
     fontSize: 12,
     color: "#777",
+    marginTop: 4,
+  },
+
+  previewImage: {
+    width: 170,
+    height: 170,
+    borderRadius: 14,
+  },
+
+  retake: {
+    marginTop: 10,
+    color: "#007AFF",
+    fontWeight: "600",
   },
 
   button: {
     backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 25,
+    padding: 18,
+    borderRadius: 30,
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 40,
+    marginBottom: 50,
   },
 
   buttonText: {
     color: "#fff",
     fontWeight: "700",
     fontSize: 16,
+  },
+  locationRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 4,
+},
+location: {
+  color: "#777",
+  fontSize: 13,
+  marginLeft: 4,
+},
+
+
+priceRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginTop: 6,
+  gap: 4,
+},
+price: {
+  color: "#007AFF",
+  fontWeight: "800",
+  fontSize: 18,
+  marginLeft: 4,
+},
+
+  captureButton: {
+    position: "absolute",
+    bottom: 50,
+    alignSelf: "center",
+    backgroundColor: "#fff",
+    width: 80,
+    height: 80,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
