@@ -3,6 +3,8 @@ import { useLocalSearchParams, router } from "expo-router";
 import useFirebaseProperties from "@/hooks/useFirebaseProperties";
 
 export default function PropertyDetails() {
+
+  
   const { id } = useLocalSearchParams();
   const { properties, loading } = useFirebaseProperties();
 
@@ -49,11 +51,28 @@ export default function PropertyDetails() {
         <Text>🛁 {property.baths} Baths</Text>
 
         <Pressable
-          style={styles.button}
-          onPress={() => router.push("/booking")}
-        >
-          <Text style={styles.buttonText}>Book Now</Text>
-        </Pressable>
+  style={styles.bookButton}
+  onPress={() =>
+    router.push({
+      pathname: "/booking",
+      params: {
+        propertyId: property.id,
+
+        title: property.title,
+
+        location: property.location,
+
+        price: property.price,
+
+        image: property.image,
+      },
+    })
+  }
+>
+  <Text style={styles.bookButtonText}>
+    Book Now
+  </Text>
+</Pressable>
 
 
       </View>
@@ -89,18 +108,19 @@ const styles = StyleSheet.create({
     color: "#777",
   },
 
-  button: {
-    marginTop: 20,
-    backgroundColor: "#007AFF",
-    padding: 14,
-    borderRadius: 12,
-    alignItems: "center",
-  },
+ bookButton: {
+  backgroundColor: "#007AFF",
+  paddingVertical: 16,
+  borderRadius: 16,
+  alignItems: "center",
+  marginTop: 20,
+},
 
-  buttonText: {
-    color: "#fff",
-    fontWeight: "700",
-  },
+bookButtonText: {
+  color: "#fff",
+  fontSize: 16,
+  fontWeight: "700",
+},
 
   center: {
     flex: 1,
