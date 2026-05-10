@@ -97,9 +97,7 @@ const {title,location,price,image,propertyId,} = useLocalSearchParams();
 
     //   return;
     // }
-
     // setLoading(true);
-
     // const imageUrl =
     //   await uploadImage();
     const imageUrl = null;
@@ -117,6 +115,7 @@ const {title,location,price,image,propertyId,} = useLocalSearchParams();
           serverTimestamp(),
       }
     );
+    
 
     Alert.alert(
       "Request Submitted",
@@ -237,7 +236,7 @@ const {title,location,price,image,propertyId,} = useLocalSearchParams();
         </Text>
 
         <TextInput
-          placeholder="John Doe"
+          placeholder="Mohammad Amin"
           value={name}
           onChangeText={setName}
           style={styles.input}
