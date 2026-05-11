@@ -1,17 +1,64 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { Text } from "react-native-paper";
+import { router } from "expo-router";
+
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 import StatCard from "@/components/admin/StatCard";
 import PropertyRequestCard from "@/components/admin/PropertyRequestCard";
+
 import usePendingProperties from "@/hooks/usePendingProperties";
-import { approveProperty, rejectProperty } from "@/services/propertyService";  
 import useAdminStats from "@/hooks/useAdminStats";
 
-export default function AdminDashboardScreen() {
-  const { requests } = usePendingProperties();
+import {
+  approveProperty,
+  rejectProperty,
+} from "@/services/propertyService";
 
+export default function AdminDashboardScreen() {
+  const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const { requests } = usePendingProperties();
   const { stats } = useAdminStats();
+
+  useEffect(() => {
+    checkAdmin();
+  }, []);
+
+  const checkAdmin = async () => {
+    try {
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        router.replace("/(auth)/login");
+        return;
+      }
+
+      const docRef = doc(db, "user", currentUser.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        router.replace("/(auth)/login");
+        return;
+      }
+
+      const userData = docSnap.data();
+
+      if (userData.role !== "Admin") {
+        router.replace("/(tabs)/home");
+        return;
+      }
+
+      setIsAdmin(true);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAccept = async (id: string) => {
     await approveProperty(id);
@@ -20,6 +67,16 @@ export default function AdminDashboardScreen() {
   const handleReject = async (id: string) => {
     await rejectProperty(id);
   };
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!isAdmin) return null;
 
   return (
     <View style={styles.container}>
@@ -60,6 +117,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+  },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
     marginTop: 40,
