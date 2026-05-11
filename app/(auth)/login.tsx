@@ -71,8 +71,10 @@ export default function Login() {
 
         if (userData.role === "User") {
           router.replace("/(tabs)/home");
-        } else {
+        } else if (userData.role === "Owner") {
           router.replace("/(owner-tabs)/owner-dashboard");
+        } else {
+          router.replace("/(admin-tabs)/admin-dashboard");
         }
       } else {
         console.log("No user data found");

@@ -67,6 +67,7 @@ export default function AddPropertyScreen() {
   createdAt: new Date(),
   type: data.type,
   status: "pending",
+  
 };
 await addDoc(collection(db, "properties"), payload);
 Alert.alert(
