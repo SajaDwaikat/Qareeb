@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import {View,Text,StyleSheet,TextInput,FlatList,Pressable,ActivityIndicator,} from "react-native";
+import {View,Text,StyleSheet,TextInput,FlatList,Pressable,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useApprovedProperties from "@/hooks/useApprovedProperties";
 import PropertyCard from "@/components/property/PropertyCard";
@@ -11,7 +11,6 @@ import { Alert } from "react-native";
 
 
 const TABS = ["All", "Student", "Family"];
-
 const filterProperties = (
   properties: any[],
   selectedTab: string,
@@ -19,7 +18,6 @@ const filterProperties = (
 ) => {
   const searchValue = search.trim().toLowerCase();
 
-  const isNumber = searchValue !== "" && !isNaN(Number(searchValue));
 
   return properties.filter((item) => {
     const title = item.title?.toLowerCase() || "";
@@ -27,22 +25,29 @@ const filterProperties = (
     const type = item.type?.toLowerCase() || "";
 
     const matchesTab =
-      selectedTab === "All" ||
-      type === selectedTab.toLowerCase();
+      selectedTab === "All" || type === selectedTab.toLowerCase();
 
-    const matchesSearch =
-      searchValue === "" ||
-      (isNumber
-        ? item.price <= Number(searchValue)
-        : title.includes(searchValue) ||
-          location.includes(searchValue) ||
-          type.includes(searchValue));
+const matchesSearch =
+  searchValue === "" ||
+  title.includes(searchValue) ||
+  location.includes(searchValue) ||
+  type.includes(searchValue) ||
+
+  item.price
+    ?.toString()
+    .includes(searchValue) ||
+
+  item.beds
+    ?.toString()
+    .includes(searchValue) ||
+
+  item.baths
+    ?.toString()
+    .includes(searchValue);
 
     return matchesTab && matchesSearch;
   });
 };
-
-
 
 
 export default function Listings() {
@@ -65,15 +70,13 @@ export default function Listings() {
 
     const snapshot = await getDocs(q);
 
-    const favIds = snapshot.docs.map(
-      (doc) => doc.data().propertyId
+    const favIds = snapshot.docs.map((doc) => doc.data().propertyId
     );
 
     setFavorites(favIds);
   };
 
-  useEffect(() => {
-    fetchFavorites();
+  useEffect(() => {fetchFavorites();
   }, [userId]);
 
 const toggleFavorite = useCallback(async (propertyId: string) => {
@@ -119,31 +122,18 @@ const toggleFavorite = useCallback(async (propertyId: string) => {
     ]
   );
 }, [userId, favorites]);
-  const filteredProperties = useMemo(() => {
-    return filterProperties(properties, selectedTab, search);
-  }, [properties, selectedTab, search]);
-
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
+  
 
 
   return (
     <SafeAreaView style={styles.container}>
       <Header title="Qareeb" />
 
-      {/* Title */}
       <Text style={styles.title}>Find your space in Nablus</Text>
       <Text style={styles.subtitle}>
         Explore the best places around you
       </Text>
 
-      {/* 🔍 Search */}
       <View style={styles.searchBox}>
         <TextInput
           placeholder="Search by location or price..."
@@ -156,8 +146,8 @@ const toggleFavorite = useCallback(async (propertyId: string) => {
 
       <View style={styles.tabs}>
         {TABS.map((tab) => (
-          <Pressable
-            key={tab}
+          <Pressable 
+          key={tab}
             onPress={() => {
               setSelectedTab(tab);
               setSearch("");
@@ -180,7 +170,11 @@ const toggleFavorite = useCallback(async (propertyId: string) => {
       </View>
 
       <FlatList
-        data={filteredProperties}
+        data={filterProperties(
+          properties,
+          selectedTab,
+          search
+)}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}

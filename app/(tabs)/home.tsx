@@ -2,10 +2,8 @@ import {View,Text,FlatList,StyleSheet,Image,Dimensions,ActivityIndicator,} from 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-
 import PropertyCard from "@/components/property/PropertyCard";
 import useApprovedProperties from "@/hooks/useApprovedProperties";
-import useFirebaseProperties from "@/hooks/useFirebaseProperties";
 
 const { width, height } = Dimensions.get("window");
 export default function Home() {
@@ -16,6 +14,20 @@ export default function Home() {
     properties: approvedProperties,
     loading: approvedLoading,
   } = useApprovedProperties();
+
+  const topRatedProperties =
+  [...approvedProperties]
+
+    .filter(
+      (property) =>
+        Number(property.rating || 0) >= 4.6
+    )
+
+    .sort(
+      (a, b) =>
+        Number(b.rating || 0) -
+        Number(a.rating || 0)
+    );
 
   if ( approvedLoading) {
     return (
@@ -35,7 +47,6 @@ export default function Home() {
       <View style={styles.overlay} />
 
       <SafeAreaView style={styles.safe}>
-        {/* Header */}
         <View style={styles.header}>
           <Ionicons name="location-sharp" size={20} color="#007AFF" />
           <Text style={styles.headerText}>Nablus Horizon</Text>
@@ -52,7 +63,7 @@ export default function Home() {
           <Text style={styles.badge}>TOP PROPERTIES</Text>
         
           <FlatList
-            data={approvedProperties}
+            data={topRatedProperties}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id.toString()}
