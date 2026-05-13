@@ -1,6 +1,8 @@
 import {View,Text,Image,StyleSheet,Pressable,ActivityIndicator,} from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import useFirebaseProperties from "@/hooks/useFirebaseProperties";
+import Rating from "@/components/property/Rating";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function PropertyDetails() {
 
@@ -45,7 +47,26 @@ export default function PropertyDetails() {
           📍 {property.location}
         </Text>
 
-        <Text>⭐ {property.rating}</Text>
+       <View style={styles.ratingContainer}>
+
+  <View style={styles.ratingHeader}>
+
+  <Ionicons
+    name="star"
+    size={18}
+    color="#f5a623"
+  />
+
+  <Text style={styles.ratingValue}>
+    {Number(property.rating || 0).toFixed(1)}
+  </Text>
+
+</View>
+
+
+  <Rating property={property} />
+
+</View>
 
         <Text>🛏 {property.beds} Rooms</Text>
         <Text>🛁 {property.baths} Baths</Text>
@@ -120,6 +141,21 @@ bookButtonText: {
   color: "#fff",
   fontSize: 16,
   fontWeight: "700",
+},
+ratingContainer: {
+  marginTop: 12,
+},
+
+ratingValue: {
+  fontSize: 16,
+  fontWeight: "700",
+  marginBottom: 8,
+},
+ratingHeader: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 4,
+  marginBottom: 8,
 },
 
   center: {
