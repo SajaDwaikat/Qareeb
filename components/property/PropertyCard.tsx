@@ -69,14 +69,14 @@ export default function PropertyCard({
           <View style={styles.rowInline}>
             <Ionicons name="bed-outline" size={14} color="#555" />
             <Text style={styles.detail}>
-              {property.beds || 2} Rooms
+              {property.rooms|| 2} Rooms
             </Text>
           </View>
 
           <View style={styles.rowInline}>
             <Ionicons name="water-outline" size={14} color="#555" />
             <Text style={styles.detail}>
-              {property.baths || 2} Baths
+              {property.beds || 2} Baths
             </Text>
           </View>
         </View>

@@ -7,23 +7,38 @@
     "icon": "",
     "scheme": "qareeb",
     "userInterfaceStyle": "automatic",
-    
+
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow Qareeb to access your photos.",
+        "NSCameraUsageDescription": "Allow Qareeb to access your camera."
+      }
     },
+
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE"
       },
-      
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.Qareeb"
     },
+
     "web": {
       "output": "static"
     },
+
     "plugins": [
       "expo-router",
+
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Qareeb to access your photos.",
+          "cameraPermission": "Allow Qareeb to access your camera."
+        }
+      ],
+
       [
         "expo-splash-screen",
         {
@@ -36,10 +51,11 @@
           }
         }
       ],
+
       "expo-font",
-      
       "expo-web-browser"
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
