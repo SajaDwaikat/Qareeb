@@ -58,10 +58,11 @@ export default function Login() {
       );
 
       const user = userCredential.user;
-        if (stayLoggedIn){
-          await AsyncStorage.setItem("stayLoggedIn", "true");
-          await AsyncStorage.setItem("user", JSON.stringify(user))
-        }
+      const token = await user.getIdToken();
+      if (stayLoggedIn) {
+        await AsyncStorage.setItem("token", token);
+        await AsyncStorage.setItem("stayLoggedIn", "true");
+      }
 
       const docRef = doc(db, "user", user.uid);
       const docSnap = await getDoc(docRef);
