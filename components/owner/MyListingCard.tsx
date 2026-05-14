@@ -51,10 +51,12 @@ export default function MyListingCard({
     router.push("/Prop/add");
   };
 
-  const handleViewDetails = () => {
-    router.push("/property/probrityDetails");
-  };
-
+const handleViewDetails = () => {
+  router.push({
+    pathname: "/property/[id]",
+    params: { id: "7V73XzOaZJ5kwPES3D7b" },
+  });
+};
   const getStatusStyle = () => {
     if (property.status === "Available") {
       return {
