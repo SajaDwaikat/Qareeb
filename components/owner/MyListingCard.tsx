@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {View,  Text,  StyleSheet,  Image,  Pressable,  Alert,} from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
@@ -9,7 +9,7 @@ type ListingType = {
   location: string;
   price: number;
   image: any;
-  status: "Available" | "Full" | "Pending" | "Incomplete";
+  status: "Available" | "Full" | "Pending";
   category: string;
   completion: string;
   views: number;
@@ -155,7 +155,11 @@ export default function MyListingCard({
               style={styles.iconButton}
               onPress={() => setShowMenu(!showMenu)}
             >
-              <Ionicons name="ellipsis-horizontal" size={18} color="#667085" />
+              <Ionicons
+                name="ellipsis-horizontal"
+                size={18}
+                color="#667085"
+              />
             </Pressable>
 
             {showMenu && (

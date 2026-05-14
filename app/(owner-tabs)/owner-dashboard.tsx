@@ -1,6 +1,6 @@
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import {ImageBackground,ScrollView,StyleSheet,Text,View,ActivityIndicator,} from "react-native";
+import { ImageBackground, ScrollView,StyleSheet, Text, View, ActivityIndicator,} from "react-native";
 import { router } from "expo-router";
 import StatCard from "../../components/owner/statCard";
 import RecentListingCard from "../../components/owner/RecentListingCard";
@@ -97,7 +97,10 @@ export default function OwnerDashboard() {
       id: "2",
       title: "Unverified Listings",
       icon: "list-outline",
-      route: "/(owner-tabs)/my-listings",
+      route: {
+        pathname: "/(owner-tabs)/my-listings",
+        params: { filter: "Pending" },
+      },
       filled: false,
       backgroundColor: "#DCEAF5",
     },
