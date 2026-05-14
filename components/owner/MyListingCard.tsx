@@ -57,6 +57,8 @@ const handleViewDetails = () => {
     params: { id: "7V73XzOaZJ5kwPES3D7b" },
   });
 };
+
+
   const getStatusStyle = () => {
     if (property.status === "Available") {
       return {

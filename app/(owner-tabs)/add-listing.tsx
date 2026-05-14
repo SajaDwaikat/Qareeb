@@ -1,5 +1,5 @@
-import { Redirect } from "expo-router";
+import AddPropertyScreen from "../Prop/add";
 
 export default function AddListingTab() {
-  return <Redirect href="/Prop/add" />;
+  return <AddPropertyScreen />;
 }

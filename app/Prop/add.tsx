@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Alert,
-} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Image,Alert,} from 'react-native';
 import Header from "@/components/ui/Header";
 import { FlatList } from "react-native";
 import { useForm, Controller } from 'react-hook-form';
@@ -18,6 +9,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import { router } from "expo-router";
 type FormData = {
   title: string;
   price: string;
@@ -82,7 +74,7 @@ Alert.alert(
 };
   return (
   <SafeAreaView style={{ flex: 1 }}>
-    <Header title="Add your property" />
+ <Header title="Add your property" />
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
