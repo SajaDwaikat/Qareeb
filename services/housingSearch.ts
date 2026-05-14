@@ -1,73 +1,69 @@
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
+// services/housingSearch.ts
 
 import { db } from "@/lib/firebase";
-import { Property } from "@/types/property";
+import { collection, getDocs } from "firebase/firestore";
 
+type Filters = {
+  location?: string | null;
+  type?: string | null;
+  title?: string | null;
+  price?: number | null;
+  rating?: number | null;
+  beds?: number | null;
+  rooms?: number | null;
+};
 
-interface Filters {
-  location?: string;
-  maxPrice?: number;
-  type?: string;
-  beds?: number;
-  rooms?: number;
-}
+export async function searchHousing(filters: Filters) {
+  console.log("FILTERS RECEIVED:", filters);
+  const snapshot = await getDocs(collection(db, "properties"));
 
-export const searchHousing = async (
-  filters: Filters
-): Promise<Property[]> => {
-  let q = query(collection(db, "properties"));
-
-  // 🔹 فلترة الموقع
-  if (filters.location) {
-    q = query(
-      q,
-      where("location", "==", filters.location)
-    );
-  }
-
-  // 🔹 نوع السكن
-  if (filters.type) {
-    q = query(
-      q,
-      where("type", "==", filters.type)
-    );
-  }
-
-  // 🔹 عدد الغرف
-  if (filters.rooms) {
-    q = query(
-      q,
-      where("rooms", ">=", filters.rooms)
-    );
-  }
-
-  // 🔹 عدد الأسرة
-  if (filters.beds) {
-    q = query(
-      q,
-      where("beds", ">=", filters.beds)
-    );
-  }
-
-  // 🔹 السعر (Firestore لا يدعم <= + >= مع مع بعض بسهولة)
-  const snapshot = await getDocs(q);
-
-  let results = snapshot.docs.map((doc) => ({
+  const properties = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  })) as Property[];
+  }));
 
-  // فلترة السعر محليًا (أفضل حل عملي)
-  if (filters.maxPrice) {
-    results = results.filter(
-      (item) => item.price <= filters.maxPrice!
+  return properties.filter((property: any) => {
+
+    const matchLocation =
+      !filters.location ||
+      property.location
+        ?.toLowerCase()
+        .includes(filters.location.toLowerCase());
+
+  const matchType =
+  !filters.type || property.type === filters.type;
+
+    const matchTitle =
+      !filters.title ||
+      property.title
+        ?.toLowerCase()
+        .includes(filters.title.toLowerCase());
+
+    const matchPrice =
+      filters.price == null ||
+      filters.price === 0 ||
+      property.price <= filters.price;
+
+    const matchRating =
+      !filters.rating || property.rating >= filters.rating;
+
+    const matchBeds =
+      !filters.beds || property.beds >= filters.beds;
+
+    const matchRooms =
+      !filters.rooms || property.rooms >= filters.rooms;
+
+    console.log("CHECK PROPERTY:", property.title);
+    console.log("MATCH LOCATION:", matchLocation);
+    console.log("MATCH TYPE:", matchType);
+    return (
+      matchLocation &&
+      matchType &&
+      matchTitle &&
+      matchPrice &&
+      matchRating &&
+      matchBeds &&
+      matchRooms
     );
-  }
-
-  return results;
-};
+  });
+}

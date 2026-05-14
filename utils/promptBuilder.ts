@@ -1,27 +1,27 @@
-export const buildPrompt = (message: string) => {
+// utils/promptBuilder.ts
+
+export function buildPrompt(userMessage: string) {
   return `
-You are a JSON extractor for a housing app.
+Extract filters from message.
 
-Extract filters from user message.
+RULES:
+- type must be ONLY:
+  "student" OR "family"
+- If not clear, return null
+- Return ONLY JSON
 
-Return ONLY valid JSON.
-
-Fields:
-- location (string)
-- maxPrice (number)
-- type (string: apartment, room, villa, etc)
-- beds (number optional)
-- rooms (number optional)
-
-Message:
-"${message}"
-
-Example output:
+FIELDS:
 {
-  "location": "نابلس",
-  "maxPrice": 300,
-  "type": "apartment",
-  "beds": 2
+  "location": string | null,
+  "type": "student" | "family" | null,
+  "title": string | null,
+  "price": number | null,
+  "rating": number | null,
+  "beds": number | null,
+  "rooms": number | null
 }
+
+MESSAGE:
+${userMessage}
 `;
-};
+}

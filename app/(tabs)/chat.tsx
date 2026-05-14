@@ -1,13 +1,8 @@
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-
+import React, { useState } from "react";
 import {
+  View,
   FlatList,
   KeyboardAvoidingView,
-  View,
   Platform,
 } from "react-native";
 
@@ -15,96 +10,84 @@ import ChatMessage from "@/components/property/ChatMessage";
 import ChatInput from "@/components/property/ChatInput";
 import TypingIndicator from "@/components/property/TypingIndicator";
 
-import { fakeAI } from "@/services/fakeAI";
 import { searchHousing } from "@/services/housingSearch";
+import { askAI } from "@/services/openRouter";
 import { buildPrompt } from "@/utils/promptBuilder";
-import { Property } from "@/types/property";
+
 type Message = {
   id: string;
-  text: string;
-  isUser: boolean;
-  properties?: Property[];
+  message: string;
+  role: "user" | "ai";
+  properties?: any[];
 };
 
 export default function ChatScreen() {
-  const [text, setText] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const flatListRef = useRef<FlatList<Message>>(null);
+  const handleSend = async () => {
+    if (!input.trim()) return;
 
-  // auto scroll
-  useEffect(() => {
-    flatListRef.current?.scrollToEnd({
-      animated: true,
-    });
-  }, [messages, loading]);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      message: input,
+      role: "user",
+    };
 
-  const sendMessage = async () => {
-    if (!text.trim()) return;
+    setMessages((prev) => [...prev, userMessage]);
+
+    const userText = input;
+    setInput("");
+    setLoading(true);
 
     try {
-      setLoading(true);
+      const prompt = buildPrompt(userText);
 
-      const userText = text;
+      const aiResponse = await askAI(prompt);
 
-      // USER MESSAGE
+      console.log("USER TEXT:", userText);
+console.log("AI RAW RESPONSE:", aiResponse);
 
-      const userMsg = {
-        id: Math.random().toString(),
-        text: userText,
-        isUser: true,
+      let filters;
+
+      try {
+        filters = JSON.parse(aiResponse);
+      } catch (e) {
+        filters = {};
+      }
+
+console.log("PARSED FILTERS:", filters);
+console.log("FINAL FILTERS TO SEARCH:", filters);
+
+      const properties = await searchHousing(filters);
+      console.log("FOUND PROPERTIES:", properties);
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        message:
+          properties.length > 0
+            ? "تم العثور على نتائج مناسبة"
+            : "لا توجد نتائج مطابقة",
+        role: "ai",
+        properties,
       };
+      
 
-      setMessages((prev) => [
-        ...prev,
-        userMsg,
-      ]);
-
-      setText("");
-
-      // ======================
-      // FAKE AI
-      // ======================
-
-      const ai =
-        await fakeAI(userText);
-
-      console.log(ai);
-
-      // ======================
-      // FIREBASE SEARCH
-      // ======================
-
-      const results =
-        await searchHousing(
-          ai.filters
-        );
-
-      console.log(results);
-
-      // ======================
-      // AI MESSAGE
-      // ======================
-
-      const aiMsg = {
-        id: Math.random().toString(),
-        text: ai.reply,
-        isUser: false,
-        properties: results,
-      };
-
-      setMessages((prev) => [
-        ...prev,
-        aiMsg,
-      ]);
+      setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
-      console.log(error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          message: "صار خطأ، حاول مرة ثانية",
+          role: "ai",
+        },
+      ]);
     }
 
     setLoading(false);
   };
-
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -115,46 +98,33 @@ export default function ChatScreen() {
       }
       keyboardVerticalOffset={90}
     >
+      <FlatList
+        data={messages}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{
+          paddingVertical: 10,
+        }}
+        renderItem={({ item }) => (
+          <ChatMessage
+            message={item.message}
+            isUser={item.role === "user"}
+            properties={item.properties}
+          />
+        )}
+      />
+
+      {loading && <TypingIndicator />}
+
       <View
         style={{
-          flex: 1,
-          backgroundColor: "#f5f5f5",
+          paddingBottom: 90,
         }}
       >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          keyExtractor={(item) =>
-            item.id.toString()
-          }
-          renderItem={({ item }) => (
-            <ChatMessage
-              message={item.text}
-              isUser={item.isUser}
-              properties={item.properties}
-            />
-          )}
-          contentContainerStyle={{
-            padding: 16,
-            paddingBottom: 120,
-          }}
+        <ChatInput
+          value={input}
+          onChange={setInput}
+          onSend={handleSend}
         />
-
-        {loading && <TypingIndicator />}
-
-        {/* input */}
-        <View
-          style={{
-            paddingBottom: 90,
-            backgroundColor: "#f5f5f5",
-          }}
-        >
-          <ChatInput
-            value={text}
-            onChange={setText}
-            onSend={sendMessage}
-          />
-        </View>
       </View>
     </KeyboardAvoidingView>
   );
