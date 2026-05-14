@@ -70,6 +70,8 @@ const {
   cameraRef,
   takePhoto,
   chooseImageOption,
+ deleteProfileImage,
+
 } = useProfileImage();
 const displayedFavorites = showAllFavorites
   ? favorites
@@ -222,6 +224,17 @@ if (showCamera) {
         </Text>
       </Pressable>
 
+<Pressable
+  style={styles.deleteButton}
+  onPress={() => {
+    setShowImageOptions(false);
+    deleteProfileImage();
+  }}
+>
+  <Text style={styles.deleteText}>
+    Delete Photo
+  </Text>
+</Pressable>
       <Pressable
         style={styles.cancelButton}
         onPress={() =>
@@ -412,5 +425,14 @@ closeCameraButton: {
   justifyContent: "center",
   alignItems: "center",
 },
+deleteButton: {
+  paddingVertical: 18,
+  alignItems: "center",
+},
 
+deleteText: {
+  color: "red",
+  fontSize: 16,
+  fontWeight: "700",
+},
 });

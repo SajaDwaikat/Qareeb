@@ -76,7 +76,7 @@ export default function PropertyCard({
           <View style={styles.rowInline}>
             <Ionicons name="water-outline" size={14} color="#555" />
             <Text style={styles.detail}>
-              {property.beds || 2} Baths
+              {property.beds || 2} Beds
             </Text>
           </View>
         </View>
