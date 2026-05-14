@@ -16,8 +16,6 @@ import { useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-const size = 60;
 export default function Login() {
   const {role} = useLocalSearchParams();
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
@@ -58,12 +56,7 @@ export default function Login() {
       );
 
       const user = userCredential.user;
-      const token = await user.getIdToken();
-      if (stayLoggedIn) {
-        await AsyncStorage.setItem("token", token);
-        await AsyncStorage.setItem("stayLoggedIn", "true");
-      }
-
+      
       const docRef = doc(db, "user", user.uid);
       const docSnap = await getDoc(docRef);
 
@@ -72,7 +65,7 @@ export default function Login() {
 
         if (userData.role === "User") {
           router.replace("/(tabs)/home");
-        } else if (userData.role === "Owner") {
+        } else if (userData.role === "Property Owner") {
           router.replace("/(owner-tabs)/owner-dashboard");
         } else {
           router.replace("/(admin-tabs)/admin-dashboard");
