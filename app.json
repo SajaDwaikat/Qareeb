@@ -51,13 +51,12 @@
           }
         }
       ],
- main
+ //main
 
       "expo-font",
-      "expo-web-browser"
-
+      "expo-web-browser",
       "expo-sqlite"
- owner-dashboard-noor
+ //owner-dashboard-noor
     ],
 
     "experiments": {

@@ -26,6 +26,14 @@ import {
   where,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+
+import { signOut } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import Button from "../../components/ui/Button";
+
+
+
 export default function Profile() {
 
   const { userData, loadingUser } = useUserProfile();
@@ -34,6 +42,7 @@ export default function Profile() {
   useState(false);
 const currentUserId = auth.currentUser?.uid || "";
 const { favorites, loading } = useUserFavorites(currentUserId);  
+
 const { data: bookings = [] } = useQuery({
   queryKey: ["bookings"],
 
@@ -86,6 +95,15 @@ const displayedFavorites = showAllFavorites
     }
   };
 
+   const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace("/(auth)/user-type");
+    } catch (error) {
+      console.log("Logout error:", error);
+    }
+  };
+
   const user = {
   name: userData?.name || "User",
   image:
@@ -95,6 +113,7 @@ const displayedFavorites = showAllFavorites
   bookings: bookings.length,
   favorites: favorites.length,
 };
+
 
 if (showCamera) {
   return (
@@ -245,14 +264,26 @@ if (showCamera) {
           Cancel
         </Text>
       </Pressable>
-
     </View>
   </View>
 </Modal>
+        <View
+          style={{
+            marginTop: 10,
+            marginBottom: 40,
+          }}
+        >
+          <Button
+            title="Log Out"
+            onPress={handleLogout}
+          />
+        </View>
 
-      </ScrollView>
+              
+      </ScrollView>  
     </SafeAreaView>
   );
+  
 }
 
 const styles = StyleSheet.create({

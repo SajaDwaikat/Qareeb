@@ -7,7 +7,6 @@ import Card from "@/components/ui/AuthCard";
 import InputField from "@/components/ui/InputField";
 import Button from "../../components/ui/Button";
 import { useState } from "react";
-import Checkbox from "expo-checkbox";
 import { Linking } from "react-native";
 import Logo from "@/components/ui/Logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -16,11 +15,8 @@ import { useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
-const size = 60;
 export default function Login() {
   const {role} = useLocalSearchParams();
-  const [stayLoggedIn, setStayLoggedIn] = useState(false);
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -58,11 +54,7 @@ export default function Login() {
       );
 
       const user = userCredential.user;
-        if (stayLoggedIn){
-          await AsyncStorage.setItem("stayLoggedIn", "true");
-          await AsyncStorage.setItem("user", JSON.stringify(user))
-        }
-
+      
       const docRef = doc(db, "user", user.uid);
       const docSnap = await getDoc(docRef);
 
@@ -71,7 +63,7 @@ export default function Login() {
 
         if (userData.role === "User") {
           router.replace("/(tabs)/home");
-        } else if (userData.role === "Owner") {
+        } else if (userData.role === "Property Owner") {
           router.replace("/(owner-tabs)/owner-dashboard");
         } else {
           router.replace("/(admin-tabs)/admin-dashboard");
@@ -154,15 +146,6 @@ export default function Login() {
              />
              {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
-              <View style={styles.rememberRow}>
-                <Checkbox
-                    value={stayLoggedIn}
-                    onValueChange={setStayLoggedIn}
-                    color={stayLoggedIn ? "#1c6ea4" : undefined}
-                    style={styles.checkbox}
-                />
-                  <Text style={styles.rememberText}>Stay logged in</Text>
-              </View>
 
               <Button title="Log In" onPress={handleLogin} />
         
@@ -235,18 +218,6 @@ const styles = StyleSheet.create({
     paddingTop:10,
     fontSize:10,
     color: "#777",
-  },
-
-  rememberRow:{
-    flexDirection:"row",
-    alignItems:"center",
-    marginTop:20,
-  },
-
-  checkbox:{
-    marginRight: 6, 
-    borderColor: "#c2c2c2",
-    borderWidth: 1.5,  
   },
 
   rememberText:{
