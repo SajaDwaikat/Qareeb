@@ -96,7 +96,7 @@ const displayedFavorites = showAllFavorites
    const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.replace("/(auth)/login");
+      router.replace("/(auth)/user-type");
     } catch (error) {
       console.log("Logout error:", error);
     }

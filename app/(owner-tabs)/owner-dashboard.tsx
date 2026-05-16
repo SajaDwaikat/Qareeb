@@ -7,6 +7,10 @@ import RecentListingCard from "../../components/owner/RecentListingCard";
 import AlertCard from "../../components/owner/AlertCard";
 import ManageButton from "../../components/owner/ManageButton";
 import useOwnerDashboard from "../../hooks/useOwnerDashboard";
+import { auth } from "@/lib/firebase";
+
+import { signOut } from "firebase/auth";
+import Button from "../../components/ui/Button";
 
 export default function OwnerDashboard() {
   const ownerId = "user1";
@@ -28,6 +32,14 @@ export default function OwnerDashboard() {
       </View>
     );
   }
+  const handleLogout = async () => {
+      try {
+        await signOut(auth);
+        router.replace("/(auth)/user-type");
+      } catch (error) {
+        console.log("Logout error:", error);
+      }
+    };
 
   const stats = [
     {
@@ -234,6 +246,21 @@ export default function OwnerDashboard() {
           image={item.image}
         />
       ))}
+
+      <View
+            style={{
+              marginTop: 10,
+              marginBottom: 40,
+              alignItems: "center",
+            }}
+            >
+              <View style={{ width: 300 }}>
+              <Button
+                title="Log Out"
+                onPress={handleLogout}
+              />
+            </View>
+              </View>
     </ScrollView>
   );
 }
