@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
 import { router } from "expo-router";
-import { auth, db } from "../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { auth, db } from "../lib/firebase";
 
 export default function Index() {
   const [loading, setLoading] = useState(true);
@@ -20,21 +20,17 @@ export default function Index() {
 
             if (userData.role === "User") {
               router.replace("/(tabs)/home");
-
             } else if (userData.role === "Property Owner") {
               router.replace("/(owner-tabs)/owner-dashboard");
-
             } else {
               router.replace("/(admin-tabs)/admin-dashboard");
             }
           } else {
             router.replace("/splash");
           }
-
         } else {
           router.replace("/splash");
         }
-
       } catch (error) {
         console.log(error);
         router.replace("/splash");

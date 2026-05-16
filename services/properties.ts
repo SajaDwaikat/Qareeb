@@ -1,4 +1,4 @@
-import {collection,getDocs,query,where,orderBy,} from "firebase/firestore";
+import {collection,getDocs,query,where,doc,updateDoc,deleteDoc,} from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export type OwnerProperty = {
@@ -13,23 +13,61 @@ export type OwnerProperty = {
   views?: number;
   likes?: number;
   createdAt?: any;
-  images?: any;
+  images?: string[];
   beds?: number;
+  isArchived?: boolean;
+  category?: string;
+  completion?: string;
 };
 
-export async function getOwnerProperties(ownerId: string): Promise<OwnerProperty[]> {
+export async function getOwnerProperties(
+  ownerId: string,
+  archived: boolean = false
+): Promise<OwnerProperty[]> {
   const q = query(
     collection(db, "properties"),
-    where("ownerId", "==", ownerId),
-    orderBy("createdAt", "desc")
+    where("ownerId", "==", ownerId)
   );
 
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...(doc.data() as Omit<OwnerProperty, "id">),
+  const properties = snapshot.docs.map((docItem) => ({
+    id: docItem.id,
+    ...(docItem.data() as Omit<OwnerProperty, "id">),
   }));
+
+  const filtered = properties.filter(
+    (item) => (item.isArchived ?? false) === archived
+  );
+
+  filtered.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+    const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+    return bTime - aTime;
+  });
+
+  return filtered;
+}
+
+export async function archiveProperty(id: string) {
+  const ref = doc(db, "properties", id);
+
+  await updateDoc(ref, {
+    isArchived: true,
+  });
+}
+
+export async function restoreProperty(id: string) {
+  const ref = doc(db, "properties", id);
+
+  await updateDoc(ref, {
+    isArchived: false,
+  });
+}
+
+export async function deleteProperty(id: string) {
+  const ref = doc(db, "properties", id);
+  await deleteDoc(ref);
 }
 
 export function buildOwnerDashboardData(properties: OwnerProperty[]) {

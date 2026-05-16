@@ -1,48 +1,67 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 export default function OwnerTabsLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: "#2563EB",
-        tabBarInactiveTintColor: "#98A2B3",
-        tabBarStyle: styles.tabBar,
-        tabBarLabelStyle: styles.tabBarLabel,
-      }}
-    >
-      <Tabs.Screen
-        name="owner-dashboard"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="grid-outline" size={22} color={color} />
-          ),
+    
+    <QueryClientProvider client={queryClient}>
+      <Tabs
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: "#2563EB",
+          tabBarInactiveTintColor: "#98A2B3",
+          tabBarStyle: styles.tabBar,
+          tabBarLabelStyle: styles.tabBarLabel,
         }}
-      />
+      >
+        <Tabs.Screen
+          name="owner-dashboard"
+          options={{
+            title: "Dashboard",
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="grid-outline" size={22} color={color} />
+            ),
+          }}
+        />
 
-      <Tabs.Screen
-        name="my-listings"
-        options={{
-          title: "My Listings",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="list-outline" size={22} color={color} />
-          ),
-        }}
-      />
+        <Tabs.Screen
+          name="my-listings"
+          options={{
+            title: "My Listings",
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="list-outline" size={22} color={color} />
+            ),
+          }}
+        />
 
-      <Tabs.Screen
-        name="add-listing"
-        options={{
-          title: "Add Listing",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="add-circle-outline" size={22} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
+        <Tabs.Screen
+          name="add-listing"
+          options={{
+            title: "Add Listing",
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="add-circle-outline" size={22} color={color} />
+            ),
+          }}
+        />
+          <Tabs.Screen
+          name="offline-demo"
+             options={{
+              href: null,
+              }}
+                 />
+
+          <Tabs.Screen
+            name="archive"
+            options={{
+              href: null,
+            }}
+          />
+       </Tabs>
+        </QueryClientProvider>
   );
 }
 

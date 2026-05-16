@@ -40,11 +40,13 @@ export default function PropertyDetails() {
         style={styles.container}
         showsVerticalScrollIndicator={false}
       >
-        <Image
-          source={{ uri: property.image }}
-          style={styles.propertyImage}
-        />
+     <View style={styles.imageWrapper}>
+  <Image
+    source={{ uri: property.image }}
+    style={styles.propertyImage}
+  />
 
+</View>
         <View style={styles.infoContainer}>
           <Text style={styles.title}>{property.title}</Text>
 
@@ -377,4 +379,19 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginTop: 10,
   },
+  imageWrapper: {
+  position: "relative",
+},
+
+editIcon: {
+  position: "absolute",
+  top: 14,
+  right: 14,
+  width: 42,
+  height: 42,
+  borderRadius: 21,
+  backgroundColor: "#0B6FB3",
+  justifyContent: "center",
+  alignItems: "center",
+},
 });

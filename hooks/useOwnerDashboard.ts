@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
-import { getOwnerProperties, buildOwnerDashboardData, OwnerProperty,} from "../services/properties";
+import { useQuery } from "@tanstack/react-query";
+import {
+  getOwnerProperties,
+  buildOwnerDashboardData,
+  OwnerProperty,
+} from "../services/properties";
 
 type DashboardData = {
   totalListings: number;
@@ -10,37 +14,23 @@ type DashboardData = {
 };
 
 export default function useOwnerDashboard(ownerId: string) {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const query = useQuery<DashboardData>({
+    queryKey: ["owner-dashboard", ownerId],
+    queryFn: async () => {
+      const properties = await getOwnerProperties(ownerId, false);
+      return buildOwnerDashboardData(properties ?? []);
+    },
+    enabled: !!ownerId,
+    retry: false,
+  });
 
-  useEffect(() => {
-    async function loadDashboard() {
-      if (!ownerId) {
-        setDashboardData(null);
-        setError("Owner ID is missing");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        const properties = await getOwnerProperties(ownerId);
-        const result = buildOwnerDashboardData(properties);
-        setDashboardData(result);
-      } catch (err) {
-        console.log("Dashboard error:", err);
-        setError("Failed to load dashboard data");
-        setDashboardData(null);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadDashboard();
-  }, [ownerId]);
-
-  return { dashboardData, loading, error };
+  return {
+    dashboardData: query.data ?? null,
+    loading: query.isLoading,
+    error: !ownerId
+      ? "Owner ID is missing"
+      : query.error
+      ? "Failed to load dashboard data"
+      : null,
+  };
 }

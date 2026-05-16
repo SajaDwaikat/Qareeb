@@ -91,7 +91,21 @@ export default function useProfileImage() {
       await pickFromGallery();
     }
   };
+const deleteProfileImage = async () => {
+  try {
+    const currentUser = auth.currentUser;
 
+    if (!currentUser) return;
+
+    await updateDoc(doc(db, "user", currentUser.uid), {
+      image: "",
+    });
+
+    Alert.alert("Success", "Profile photo deleted");
+  } catch (error) {
+    console.log("Error deleting image:", error);
+  }
+};
   return {
     showCamera,
     setShowCamera,
@@ -100,5 +114,7 @@ export default function useProfileImage() {
     takePhoto,
     pickFromGallery,
     chooseImageOption,
+    deleteProfileImage,
+
   };
 }
