@@ -20,12 +20,21 @@ export default function PropertyCard({
       <View>
         <Image source={{ uri: property.image }} style={styles.image} />
 
-        <View style={styles.rating}>
-          <Ionicons name="star" size={14} color="#f5a623" />
-          <Text style={styles.ratingText}>
-            {property.rating || 4.5}
-          </Text>
-        </View>
+    <View style={styles.rating}>
+
+  <Ionicons
+    name="star"
+    size={14}
+    color="#f5a623"
+  />
+
+  <Text style={styles.ratingText}>
+    {property.ratingsCount > 0
+      ? Number(property.rating).toFixed(1)
+      : "New"}
+  </Text>
+
+</View>
 
         {showFavorite && (
           <Pressable
@@ -34,7 +43,7 @@ export default function PropertyCard({
           >
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
-              size={18}
+              size={10}
               color={isFavorite ? "red" : "#333"}
             />
           </Pressable>
@@ -60,14 +69,14 @@ export default function PropertyCard({
           <View style={styles.rowInline}>
             <Ionicons name="bed-outline" size={14} color="#555" />
             <Text style={styles.detail}>
-              {property.beds || 2} Rooms
+              {property.rooms|| 2} Rooms
             </Text>
           </View>
 
           <View style={styles.rowInline}>
             <Ionicons name="water-outline" size={14} color="#555" />
             <Text style={styles.detail}>
-              {property.baths || 2} Baths
+              {property.beds || 2} Beds
             </Text>
           </View>
         </View>
@@ -105,15 +114,19 @@ const styles = StyleSheet.create({
     top: 12,
     right: 12, 
     backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 12,
   },
 
+
   ratingText: {
     fontSize: 12,
     fontWeight: "700",
   },
+
 
   content: {
     padding: 16,

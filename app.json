@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
 
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow Qareeb to access your photos.",
+        "NSCameraUsageDescription": "Allow Qareeb to access your camera."
+      }
     },
 
     "android": {
@@ -26,6 +30,15 @@
 
     "plugins": [
       "expo-router",
+
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Qareeb to access your photos.",
+          "cameraPermission": "Allow Qareeb to access your camera."
+        }
+      ],
+
       [
         "expo-splash-screen",
         {
@@ -37,7 +50,18 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
-    ]
+      ],
+ //main
+
+      "expo-font",
+      "expo-web-browser",
+      "expo-sqlite"
+ //owner-dashboard-noor
+    ],
+
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
   }
 }

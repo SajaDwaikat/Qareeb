@@ -7,7 +7,10 @@ import Card from "@/components/ui/AuthCard";
 import InputField from "@/components/ui/InputField";
 import Button from "../../components/ui/Button";
 import { useState } from "react";
+<<<<<<< HEAD
 import Checkbox from "expo-checkbox";
+=======
+>>>>>>> 435960a90965b607edc4483be76adac26ecc623a
 import { Linking } from "react-native";
 import Logo from "@/components/ui/Logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -20,7 +23,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const size = 60;
 export default function Login() {
   const {role} = useLocalSearchParams();
+<<<<<<< HEAD
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
+=======
+>>>>>>> 435960a90965b607edc4483be76adac26ecc623a
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -58,6 +64,7 @@ export default function Login() {
       );
 
       const user = userCredential.user;
+<<<<<<< HEAD
         if (stayLoggedIn){
           await AsyncStorage.setItem("stayLoggedIn", "true");
           await AsyncStorage.setItem("user", JSON.stringify(user))
@@ -113,6 +120,59 @@ export default function Login() {
 
         <Logo title="Qareeb" icon="business-outline" />
 
+=======
+      
+      const docRef = doc(db, "user", user.uid);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+
+        if (userData.role === "User") {
+          router.replace("/(tabs)/home");
+        } else if (userData.role === "Property Owner") {
+          router.replace("/(owner-tabs)/owner-dashboard");
+        } else {
+          router.replace("/(admin-tabs)/admin-dashboard");
+        }
+      } else {
+        console.log("No user data found");
+      }
+
+    } catch (error: any) {
+      console.log("ERROR CODE:", error.code);
+
+      let errorMessage = "Login failed. Try again.";
+
+      switch (error.code) {
+        case "auth/user-not-found":
+        case "auth/invalid-credential":
+          errorMessage = "No account found with this email";
+          break;
+
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password";
+          break;
+
+        case "auth/invalid-email":
+          errorMessage = "Invalid email format";
+          break;
+      }
+
+      setErrors({
+        email: "",
+        password: errorMessage,
+      });
+    }
+  }  
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f9fafb" }}>
+      <ScrollView contentContainerStyle={styles.container}>
+
+        <Logo title="Qareeb" icon="business-outline" />
+
+>>>>>>> 435960a90965b607edc4483be76adac26ecc623a
      
         <View style={styles.header}>
           <Text style={styles.title}>
@@ -154,6 +214,7 @@ export default function Login() {
              />
              {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
+<<<<<<< HEAD
               <View style={styles.rememberRow}>
                 <Checkbox
                     value={stayLoggedIn}
@@ -163,6 +224,8 @@ export default function Login() {
                 />
                   <Text style={styles.rememberText}>Stay logged in</Text>
               </View>
+=======
+>>>>>>> 435960a90965b607edc4483be76adac26ecc623a
 
               <Button title="Log In" onPress={handleLogin} />
         
@@ -237,6 +300,7 @@ const styles = StyleSheet.create({
     color: "#777",
   },
 
+<<<<<<< HEAD
   rememberRow:{
     flexDirection:"row",
     alignItems:"center",
@@ -249,6 +313,8 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,  
   },
 
+=======
+>>>>>>> 435960a90965b607edc4483be76adac26ecc623a
   rememberText:{
     fontSize: 12,
     color: "#666",

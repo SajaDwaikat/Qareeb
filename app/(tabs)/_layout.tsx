@@ -7,8 +7,8 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
 
-        tabBarActiveTintColor: "#007AFF",
-        tabBarInactiveTintColor: "#888",
+  tabBarActiveTintColor: "#007AFF",   
+  tabBarInactiveTintColor: "#888",   
 
         tabBarStyle: {
           position: "absolute",
@@ -28,7 +28,7 @@ export default function TabsLayout() {
       }}
     >
 
-
+       
       <Tabs.Screen
         name="home"
         options={{
@@ -39,8 +39,7 @@ export default function TabsLayout() {
         }}
       />
 
-
-
+      
       <Tabs.Screen
         name="listings"
         options={{
@@ -81,7 +80,7 @@ export default function TabsLayout() {
         }}
       />
 
-
+      
       <Tabs.Screen
         name="profile"
         options={{
