@@ -63,7 +63,7 @@ export default function Home() {
           <Text style={styles.badge}>TOP PROPERTIES</Text>
         
           <FlatList
-            data={topRatedProperties}
+            data={approvedProperties}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id.toString()}
