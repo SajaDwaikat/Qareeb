@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as SQLite from "expo-sqlite";
-import { View, Text, StyleSheet, TextInput, Pressable, ScrollView,} from "react-native";
+import { View, Text, StyleSheet, TextInput, Pressable, ScrollView, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import MyListingCard from "../../components/owner/MyListingCard";
@@ -288,8 +288,9 @@ export default function MyListings() {
 
   return (
     <View style={styles.screen}>
-      <Header title="My Listings"
-      showBackButton={true} />
+      <View style={{ paddingTop: 20 }}>
+        <Header title="Property Requests" showBackButton={true} />
+      </View>
 
       <ScrollView
         contentContainerStyle={styles.contentContainer}
