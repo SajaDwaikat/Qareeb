@@ -11,7 +11,6 @@ import {
 } from "react-native";
 
 import { LinearGradient } from "expo-linear-gradient";
-import LottieView from "lottie-react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import ChatMessage from "@/components/property/ChatMessage";
