@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { createNotification } from "@/services/notificationService";
+import { NOTIFICATION_TYPES } from "@/constants/notifications";
 import {
   Alert,
   ScrollView,
@@ -22,6 +24,7 @@ import {
 type RequestItem = {
   id: string;
   name: string;
+  userId?: string;
   apartmentName: string;
   status: string;
   createdAt?: any;
@@ -61,22 +64,41 @@ export default function RequestsScreen() {
     return unsubscribe;
   }, []);
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = async (item: RequestItem) => {
     try {
-      await updateDoc(doc(db, "bookings", id), {
+      await updateDoc(doc(db, "bookings", item.id), {
         status: "approved",
       });
+
+      if (item.userId) {
+        try {
+          await createNotification({
+            receiverId: item.userId,
+            title: "Booking approved",
+            message: `Your booking request for ${item.apartmentName || "the property"
+              } has been approved.`,
+            type: NOTIFICATION_TYPES.BOOKING_APPROVED,
+            relatedId: item.id,
+          });
+        } catch (notificationError) {
+          console.log(
+            "BOOKING APPROVAL NOTIFICATION ERROR:",
+            notificationError
+          );
+        }
+      }
 
       Alert.alert("Success", "Request approved");
     } catch (error) {
       console.log("Approve error:", error);
       Alert.alert("Error", "Failed to approve request");
     }
+
   };
 
-  const handleCancel = async (id: string) => {
+  const handleCancel = async (item: RequestItem) => {
     try {
-      await updateDoc(doc(db, "bookings", id), {
+      await updateDoc(doc(db, "bookings", item.id), {
         status: "cancelled",
       });
 
@@ -140,14 +162,15 @@ export default function RequestsScreen() {
               <View style={styles.buttonRow}>
                 <TouchableOpacity
                   style={styles.approveButton}
-                  onPress={() => handleApprove(item.id)}
+                  onPress={() => handleApprove(item)}
+
                 >
                   <Text style={styles.buttonText}>Approve</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.cancelButton}
-                  onPress={() => handleCancel(item.id)}
+                  onPress={() => handleCancel(item)}
                 >
                   <Text style={styles.buttonText}>Cancel</Text>
                 </TouchableOpacity>

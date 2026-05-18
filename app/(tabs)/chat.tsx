@@ -120,7 +120,13 @@ console.log("FINAL FILTERS TO SEARCH:", filters);
           paddingBottom: 90,
         }}
       >
-        <ChatInput
+        <View
+          style={{
+            paddingTop: 16,
+            marginTop: 50,
+          }}
+        />
+        <ChatInput 
           value={input}
           onChange={setInput}
           onSend={handleSend}
