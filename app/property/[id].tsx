@@ -186,11 +186,20 @@ export default function PropertyDetails() {
           <Rating property={property} />
         </View>
 
-        <OwnerCard
-          ownerName={property.ownerName}
-          ownerImage={property.ownerImage}
-          ownerSince={property.ownerSince}
-        />
+     <View style={styles.moreDetailsCard}>
+  <View style={styles.moreDetailsContent}>
+    <View>
+      <Text style={styles.moreDetailsTitle}>
+        Need More Details?
+      </Text>
+</View>
+  <Button
+  title="More Details"
+  onPress={() => router.push("/(tabs)/chat")}
+/>
+  </View>
+</View>
+
 
         <Button
           title="Book Now"
@@ -385,4 +394,26 @@ editIcon: {
   justifyContent: "center",
   alignItems: "center",
 },
+moreDetailsCard: {
+  backgroundColor: "#fff",
+  borderRadius: 24,
+  padding: 18,
+  marginTop: 24,
+  shadowColor: "#000",
+  shadowOpacity: 0.05,
+  shadowRadius: 10,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 3,
+},
+
+moreDetailsContent: {
+  gap: 14,
+},
+
+moreDetailsTitle: {
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#222",
+},
+
 });
