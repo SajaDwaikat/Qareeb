@@ -1,4 +1,3 @@
-import React from "react";
 import { View } from "react-native";
 import { Text, Avatar } from "react-native-paper";
 import PropertyCard from "./PropertyCard";

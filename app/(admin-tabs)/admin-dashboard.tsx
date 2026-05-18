@@ -15,6 +15,7 @@ import usePendingProperties from "@/hooks/usePendingProperties";
 import useAdminStats from "@/hooks/useAdminStats";
 import { signOut } from "firebase/auth";
 
+
 import {
   approveProperty,
   rejectProperty,
@@ -24,12 +25,14 @@ export default function AdminDashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const { requests } = usePendingProperties();
+  
+  const { requests, setRequests } = usePendingProperties();
   const { stats } = useAdminStats();
 
   useEffect(() => {
     checkAdmin();
   }, []);
+  
 
   const checkAdmin = async () => {
     try {
@@ -63,21 +66,29 @@ export default function AdminDashboardScreen() {
     }
   };
 
-  const handleAccept = async (id: string) => {
-    await approveProperty(id);
-  };
-  
+
   const handleDetails = (id: string) => {
-  router.push({
-    pathname: "/property/[id]",
-    params: { id },
-  });
+    router.push({
+      pathname: "/property/[id]",
+      params: { id },
+    });
+  };
+
+ const handleAccept = async (id: string) => {
+  await approveProperty(id);
+
+  setRequests((prev) =>
+    prev.filter((item) => item.id !== id)
+  );
 };
 
-  const handleReject = async (id: string) => {
-    await rejectProperty(id);
-  };
+const handleReject = async (id: string) => {
+  await rejectProperty(id);
 
+  setRequests((prev) =>
+    prev.filter((item) => item.id !== id)
+  );
+};
   if (loading) {
     return (
       <View style={styles.center}>
@@ -130,12 +141,12 @@ export default function AdminDashboardScreen() {
         data={requests}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-         <PropertyRequestCard
-  item={item}
-  onAccept={handleAccept}
-  onReject={handleReject}
-  onDetails={handleDetails}
-/>
+          <PropertyRequestCard
+            item={item}
+            onAccept={handleAccept}
+            onReject={handleReject}
+            onDetails={handleDetails}
+          />
         )}
       />
 
