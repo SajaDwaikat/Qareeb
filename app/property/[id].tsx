@@ -213,6 +213,7 @@ export default function PropertyDetails() {
                 location: property.location,
                 price: String(property.price),
                 image: property.image,
+                ownerId: property.ownerId ?? "",
               },
             })
           }
@@ -223,54 +224,6 @@ export default function PropertyDetails() {
 }
 
 const styles = StyleSheet.create({
-<<<<<<< HEAD
-  container: { flex: 1, backgroundColor: "#fff" },
-
-  image: {
-    width: "100%",
-    height: 250,
-  },
-
-  content: {
-    padding: 16,
-  },
-
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-
-  price: {
-    fontSize: 18,
-    color: "#007AFF",
-    marginTop: 6,
-  },
-
-  location: {
-    marginTop: 6,
-    color: "#777",
-  },
-
- bookButton: {
-  backgroundColor: "#007AFF",
-  paddingVertical: 16,
-  borderRadius: 16,
-  alignItems: "center",
-  marginTop: 20,
-},
-
-bookButtonText: {
-  color: "#fff",
-  fontSize: 16,
-  fontWeight: "700",
-},
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-=======
   container: {
     flex: 1,
     padding: 20,
@@ -442,5 +395,4 @@ editIcon: {
   justifyContent: "center",
   alignItems: "center",
 },
->>>>>>> 435960a90965b607edc4483be76adac26ecc623a
 });

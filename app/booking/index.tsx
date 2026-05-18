@@ -8,13 +8,15 @@ import {ref,uploadBytes,getDownloadURL,} from "firebase/storage";
 import {addDoc,collection,serverTimestamp,} from "firebase/firestore";
 import { db, storage } from "../../lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
+import { NOTIFICATION_TYPES } from "@/constants/notifications";
+import { createNotification } from "@/services/notificationService";
 
 export default function Booking() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [idNumber, setIdNumber] = useState("");
   const [notes, setNotes] = useState("");
-const {title,location,price,image,propertyId,} = useLocalSearchParams();
+const {title,location,price,image,propertyId,ownerId,} = useLocalSearchParams();
   const [cameraPermission, requestCameraPermission] =
     useCameraPermissions();
   const cameraRef = useRef<any>(null);
@@ -102,7 +104,7 @@ const {title,location,price,image,propertyId,} = useLocalSearchParams();
     //   await uploadImage();
     const imageUrl = null;
 
-    await addDoc(
+    const bookingRef = await addDoc(
       collection(db, "bookings"),
       {
         propertyId,apartmentName: title,
@@ -115,6 +117,21 @@ const {title,location,price,image,propertyId,} = useLocalSearchParams();
           serverTimestamp(),
       }
     );
+
+    console.log("OWNER ID:", ownerId);
+    if (typeof ownerId === "string" && ownerId.length > 0) {
+      try {
+        await createNotification({
+          receiverId: ownerId,
+          title: "New booking request",
+          message: `${name} requested to book ${title || "your property"}.`,
+          type: NOTIFICATION_TYPES.BOOKING_REQUEST,
+          relatedId: bookingRef.id,
+        });
+      } catch (notificationError) {
+        console.log("BOOKING NOTIFICATION ERROR:", notificationError);
+      }
+    }
     
 
     Alert.alert(

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, FlatList, StyleSheet } from "react-native";
 import { Text } from "react-native-paper";
 import { router } from "expo-router";
+import Button from "../../components/ui/Button";
+import Header from "@/components/ui/Header";
 
 import { auth, db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -11,6 +13,7 @@ import PropertyRequestCard from "@/components/admin/PropertyRequestCard";
 
 import usePendingProperties from "@/hooks/usePendingProperties";
 import useAdminStats from "@/hooks/useAdminStats";
+import { signOut } from "firebase/auth";
 
 import {
   approveProperty,
@@ -78,11 +81,29 @@ export default function AdminDashboardScreen() {
 
   if (!isAdmin) return null;
 
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace("/(auth)/user-type");
+    } catch (error) {
+      console.log("Logout error:", error);
+    }
+  };
+
+
   return (
-    <View style={styles.container}>
-      <Text variant="headlineMedium" style={styles.header}>
-        Admin Dashboard
-      </Text>
+
+    <View>
+
+      <View style={styles.header}>
+        <Header
+          title="Admin Dashboard"
+          showBackButton={false}
+        />
+      </View>
+
+
 
       <View style={styles.statsRow}>
         <StatCard title="Users" value={stats.users} icon="account-group" />
@@ -98,7 +119,7 @@ export default function AdminDashboardScreen() {
         Property Requests
       </Text>
 
-      <FlatList
+      <FlatList style={{ paddingHorizontal: 20 }}
         data={requests}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
@@ -109,6 +130,15 @@ export default function AdminDashboardScreen() {
           />
         )}
       />
+
+
+      <View style={{ marginHorizontal: 20 }}>
+        <Button
+          title="Log Out"
+          onPress={handleLogout}
+        />
+      </View>
+
     </View>
   );
 }
@@ -116,25 +146,30 @@ export default function AdminDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    marginHorizontal: 20,
   },
   header: {
-    marginTop: 40,
+
+    width: "100%",
+    backgroundColor: "#fff",
+    paddingTop: 20,
     marginBottom: 20,
-    fontWeight: "bold",
   },
   statsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+    marginHorizontal: 20,
   },
   section: {
     marginTop: 20,
     marginBottom: 10,
+    marginHorizontal: 20,
   },
 });

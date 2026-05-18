@@ -288,7 +288,8 @@ export default function MyListings() {
 
   return (
     <View style={styles.screen}>
-      <Header title="My Listings" />
+      <Header title="My Listings"
+      showBackButton={true} />
 
       <ScrollView
         contentContainerStyle={styles.contentContainer}
