@@ -10,9 +10,7 @@ export default function Home() {
   const tabHeight = useBottomTabBarHeight();
 
 
-  const {
-    properties: approvedProperties,
-    loading: approvedLoading,
+  const {properties: approvedProperties,loading: approvedLoading,
   } = useApprovedProperties();
 
   const topRatedProperties =
@@ -63,7 +61,7 @@ export default function Home() {
           <Text style={styles.badge}>TOP PROPERTIES</Text>
         
           <FlatList
-            data={approvedProperties}
+            data={topRatedProperties}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id.toString()}
@@ -76,7 +74,7 @@ export default function Home() {
           />
         </View>
       </SafeAreaView>
-    </View>
+    </View> 
   );
 }
 

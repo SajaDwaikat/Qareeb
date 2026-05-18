@@ -1,11 +1,6 @@
 import { useEffect } from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  runOnJS,
-} from "react-native-reanimated";
+import Animated, {useSharedValue,useAnimatedStyle,withTiming,runOnJS,} from "react-native-reanimated";
 import { router } from "expo-router";
 
 export default function SplashScreen() {
