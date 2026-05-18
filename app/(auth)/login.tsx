@@ -6,18 +6,13 @@ import React from "react";
 import Card from "@/components/ui/AuthCard";
 import InputField from "@/components/ui/InputField";
 import Button from "../../components/ui/Button";
-import { useState } from "react";
 import { Linking } from "react-native";
 import Logo from "@/components/ui/Logo";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../lib/firebase";
-import { useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 
-
-const size = 60;
 export default function Login() {
-  const {role} = useLocalSearchParams();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -47,7 +42,6 @@ export default function Login() {
     }
 
     try {
-
       const userCredential = await signInWithEmailAndPassword(
         auth,
         email,
@@ -55,7 +49,6 @@ export default function Login() {
       );
 
       const user = userCredential.user;
-      
       const docRef = doc(db, "user", user.uid);
       const docSnap = await getDoc(docRef);
 
@@ -92,7 +85,6 @@ export default function Login() {
           errorMessage = "Invalid email format";
           break;
       }
-
       setErrors({
         email: "",
         password: errorMessage,
@@ -124,8 +116,7 @@ export default function Login() {
                 icon="mail-outline"
                 placeholder="email@example.com"
                 value = {email}
-                onChangeText={setEmail}
-                
+                onChangeText={setEmail}   
             />
             {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
@@ -146,7 +137,6 @@ export default function Login() {
                 }
              />
              {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
-
 
               <Button title="Log In" onPress={handleLogin} />
         

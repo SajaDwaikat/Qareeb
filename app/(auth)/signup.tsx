@@ -12,7 +12,6 @@ import { doc, setDoc } from "firebase/firestore";
 
 export default function Signup() {
   const {role} = useLocalSearchParams();
-
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [confirmPassword, setConfirmPassword] = React.useState("");
@@ -60,7 +59,6 @@ export default function Signup() {
       setErrors(newErrors);
       return;
     }
-
     setErrors({
       name: "",
       email: "",

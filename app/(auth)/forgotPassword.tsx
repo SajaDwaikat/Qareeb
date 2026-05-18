@@ -9,10 +9,8 @@ import {
   Alert,
 } from "react-native";
 import {router} from "expo-router";
-
 import { Ionicons } from "@expo/vector-icons";
 import { sendPasswordResetEmail } from "firebase/auth";
-
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/AuthCard";
 import { auth } from "../../lib/firebase";
@@ -25,10 +23,8 @@ export default function ForgotPasswordScreen() {
       Alert.alert("Error", "Please enter your email");
       return;
     }
-
     try {
       await sendPasswordResetEmail(auth, email);
-
       Alert.alert(
         "Success",
         "Password reset email sent successfully!"
