@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Alert,
-} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Image,Alert,} from 'react-native';
 import Header from "@/components/ui/Header";
 import { FlatList } from "react-native";
 import { useForm, Controller } from 'react-hook-form';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import Button from "@/components/ui/Button";
 import InputField from "@/components/ui/InputField";
+import { NOTIFICATION_TYPES } from "@/constants/notifications";
+import {
+  createNotification,
+  getAdminReceiverIds,
+} from "@/services/notificationService";
+import { router } from "expo-router";
 type FormData = {
   title: string;
   price: string;
@@ -67,9 +64,28 @@ export default function AddPropertyScreen() {
   createdAt: new Date(),
   type: data.type,
   status: "pending",
+  ownerId: auth.currentUser?.uid ?? null,
   
 };
-await addDoc(collection(db, "properties"), payload);
+const propertyRef = await addDoc(collection(db, "properties"), payload);
+
+try {
+  const adminIds = await getAdminReceiverIds();
+
+  await Promise.all(
+    adminIds.map((adminId) =>
+      createNotification({
+        receiverId: adminId,
+        title: "Property submitted",
+        message: `${data.title} is waiting for admin approval.`,
+        type: NOTIFICATION_TYPES.PROPERTY_SUBMITTED,
+        relatedId: propertyRef.id,
+      })
+    )
+  );
+} catch (notificationError) {
+  console.log("PROPERTY SUBMISSION NOTIFICATION ERROR:", notificationError);
+}
 Alert.alert(
       "Success",
       "Your request has been submitted successfully. It will be reviewed within 24 hours."
@@ -82,7 +98,7 @@ Alert.alert(
 };
   return (
   <SafeAreaView style={{ flex: 1 }}>
-    <Header title="Add your property" />
+ <Header title="Add your property" />
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}

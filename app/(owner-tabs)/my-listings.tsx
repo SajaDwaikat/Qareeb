@@ -1,25 +1,56 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import * as SQLite from "expo-sqlite";
-import { View, Text, StyleSheet, TextInput, Pressable, ScrollView,} from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  ScrollView,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
+import { getAuth } from "firebase/auth";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+
+import { db as firebaseDb } from "@/lib/firebase";
+import useApprovedProperties from "@/hooks/useApprovedProperties";
+
 import MyListingCard from "../../components/owner/MyListingCard";
 import FilterButton from "../../components/owner/FilterButton";
 import Header from "../../components/ui/Header";
 
+const FIREBASE_COLLECTION = "properties";
+
+type ListingStatus = "Available" | "Full" | "Pending";
+
 type ListingType = {
   id: string;
+  ownerId?: string;
   title: string;
   location: string;
   price: number;
   image: any;
   imageKey: string;
-  status: "Available" | "Full" | "Pending";
+  imageUrl?: string;
+  status: ListingStatus;
   category: string;
   completion: string;
   views: number;
   likes: number;
   archived: number;
+  description?: string;
+  beds?: number;
+  baths?: number;
+  source?: string;
 };
 
 const IMAGES: Record<string, any> = {
@@ -29,89 +60,194 @@ const IMAGES: Record<string, any> = {
   nablusHouse: require("../../assets/images/nablus house.png"),
 };
 
-const initialListings = [
-  {
-    id: "1",
-    title: "Modern Studio near KAU",
-    location: "Al-Jamia District",
-    price: 1200,
-    imageKey: "modern",
-    status: "Available",
-    category: "Student",
-    completion: "85%",
-    views: 124,
-    likes: 18,
-    archived: 0,
-  },
-  {
-    id: "2",
-    title: "Shared Room for Students",
-    location: "Al-Safa",
-    price: 600,
-    imageKey: "nablusModern",
-    status: "Full",
-    category: "Single",
-    completion: "60%",
-    views: 89,
-    likes: 12,
-    archived: 0,
-  },
-  {
-    id: "3",
-    title: "Family Apartment 3BR",
-    location: "Al-Rawdah",
-    price: 3500,
-    imageKey: "nablus2",
-    status: "Pending",
-    category: "Family",
-    completion: "45%",
-    views: 45,
-    likes: 5,
-    archived: 0,
-  },
-  {
-    id: "4",
-    title: "Student Room in Rafidia",
-    location: "Rafidia",
-    price: 900,
-    imageKey: "nablusHouse",
-    status: "Available",
-    category: "Student",
-    completion: "40%",
-    views: 68,
-    likes: 7,
-    archived: 0,
-  },
-  {
-    id: "5",
-    title: "Private Studio in Nablus",
-    location: "City Center",
-    price: 1500,
-    imageKey: "modern",
-    status: "Available",
-    category: "Single",
-    completion: "95%",
-    views: 201,
-    likes: 33,
-    archived: 0,
-  },
-  {
-    id: "6",
-    title: "Family Flat near University",
-    location: "Rafidia",
-    price: 2800,
-    imageKey: "nablus2",
-    status: "Pending",
-    category: "Family",
-    completion: "70%",
-    views: 92,
-    likes: 14,
-    archived: 0,
-  },
-];
+const getLocalImage = (imageKey?: string) => {
+  if (imageKey && IMAGES[imageKey]) {
+    return IMAGES[imageKey];
+  }
+
+  return IMAGES.modern;
+};
+
+const getFirebaseImageUrl = (item: any) => {
+  if (typeof item.imageUrl === "string" && item.imageUrl.length > 0) {
+    return item.imageUrl;
+  }
+
+  if (typeof item.image === "string" && item.image.length > 0) {
+    return item.image;
+  }
+
+  if (typeof item.coverImage === "string" && item.coverImage.length > 0) {
+    return item.coverImage;
+  }
+
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    return item.images[0];
+  }
+
+  return "";
+};
+
+const getStatusFromFirebase = (item: any): ListingStatus => {
+  const approvalStatus = String(
+    item.approvalStatus ?? item.approval ?? item.approvedStatus ?? ""
+  ).toLowerCase();
+
+  const status = String(item.status ?? "").toLowerCase();
+
+  const availabilityStatus = String(
+    item.availabilityStatus ?? item.availability ?? ""
+  ).toLowerCase();
+
+  if (
+    approvalStatus === "pending" ||
+    approvalStatus === "wait" ||
+    status === "pending"
+  ) {
+    return "Pending";
+  }
+
+  if (
+    availabilityStatus === "full" ||
+    status === "full" ||
+    item.isFull === true
+  ) {
+    return "Full";
+  }
+
+  return "Available";
+};
+
+const mapRowToListing = (item: any): ListingType => {
+  const imageUrl = item.imageUrl ?? "";
+  const imageKey = item.imageKey ?? "modern";
+
+  return {
+    id: item.id,
+    ownerId: item.ownerId ?? "",
+    title: item.title ?? "",
+    location: item.location ?? "",
+    price: Number(item.price ?? 0),
+
+    imageKey,
+    imageUrl,
+    image:
+      imageUrl && imageUrl.length > 0
+        ? { uri: imageUrl }
+        : getLocalImage(imageKey),
+
+    status: item.status ?? "Available",
+    category: item.category ?? item.type ?? "Student",
+    completion: item.completion ?? "100%",
+    views: Number(item.views ?? 0),
+    likes: Number(item.likes ?? 0),
+    archived: Number(item.archived ?? 0),
+    description: item.description ?? "",
+    beds: Number(item.beds ?? 0),
+    baths: Number(item.baths ?? 0),
+    source: item.source ?? "local",
+  };
+};
+
+const mapFirebaseToSQLiteItem = (
+  id: string,
+  item: any,
+  source: string
+): Omit<ListingType, "image"> => {
+  const imageUrl = getFirebaseImageUrl(item);
+  const status = getStatusFromFirebase(item);
+
+  return {
+    id,
+    ownerId: item.ownerId ?? "",
+    title: item.title ?? "",
+    location: item.location ?? "",
+    price: Number(item.price ?? 0),
+    imageKey: item.imageKey ?? "modern",
+    imageUrl,
+    status,
+    category: item.category ?? item.type ?? "Student",
+    completion: item.completion ?? "100%",
+    views: Number(item.views ?? 0),
+    likes: Number(item.likes ?? 0),
+    archived: item.isArchived || item.archived ? 1 : 0,
+    description: item.description ?? "",
+    beds: Number(item.beds ?? 0),
+    baths: Number(item.baths ?? 0),
+    source,
+  };
+};
+
+const addColumnIfMissing = async (
+  database: SQLite.SQLiteDatabase,
+  columnName: string,
+  columnDefinition: string
+) => {
+  const columns = await database.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(listings);"
+  );
+
+  const exists = columns.some((column) => column.name === columnName);
+
+  if (!exists) {
+    await database.execAsync(
+      `ALTER TABLE listings ADD COLUMN ${columnName} ${columnDefinition};`
+    );
+  }
+};
+
+const upsertListing = async (
+  database: SQLite.SQLiteDatabase,
+  item: Omit<ListingType, "image">
+) => {
+  await database.runAsync(
+    `
+    INSERT OR REPLACE INTO listings
+    (
+      id,
+      ownerId,
+      title,
+      location,
+      price,
+      imageKey,
+      imageUrl,
+      status,
+      category,
+      completion,
+      views,
+      likes,
+      archived,
+      description,
+      beds,
+      baths,
+      source
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `,
+    item.id,
+    item.ownerId ?? "",
+    item.title,
+    item.location,
+    item.price,
+    item.imageKey,
+    item.imageUrl ?? "",
+    item.status,
+    item.category,
+    item.completion,
+    item.views,
+    item.likes,
+    item.archived,
+    item.description ?? "",
+    item.beds ?? 0,
+    item.baths ?? 0,
+    item.source ?? "firebase"
+  );
+};
 
 export default function MyListings() {
   const { filter } = useLocalSearchParams();
+
+  const { properties: approvedProperties } = useApprovedProperties();
 
   const [db, setDb] = useState<SQLite.SQLiteDatabase | null>(null);
   const [listings, setListings] = useState<ListingType[]>([]);
@@ -124,56 +260,46 @@ export default function MyListings() {
   useEffect(() => {
     let cancelled = false;
 
-    (async () => {
-      const database = await SQLite.openDatabaseAsync("my_listings_offline.db");
+    const setupDatabase = async () => {
+      const database = await SQLite.openDatabaseAsync(
+        "my_listings_offline.db"
+      );
 
       await database.execAsync(`
         CREATE TABLE IF NOT EXISTS listings (
           id TEXT PRIMARY KEY NOT NULL,
+          ownerId TEXT,
           title TEXT NOT NULL,
           location TEXT NOT NULL,
           price INTEGER NOT NULL,
-          imageKey TEXT NOT NULL,
+          imageKey TEXT,
+          imageUrl TEXT,
           status TEXT NOT NULL,
-          category TEXT NOT NULL,
-          completion TEXT NOT NULL,
-          views INTEGER NOT NULL,
-          likes INTEGER NOT NULL,
-          archived INTEGER NOT NULL DEFAULT 0
+          category TEXT,
+          completion TEXT,
+          views INTEGER DEFAULT 0,
+          likes INTEGER DEFAULT 0,
+          archived INTEGER NOT NULL DEFAULT 0,
+          description TEXT,
+          beds INTEGER DEFAULT 0,
+          baths INTEGER DEFAULT 0,
+          source TEXT DEFAULT 'local'
         );
       `);
 
-      const row = await database.getFirstAsync<{ count: number }>(
-        "SELECT COUNT(*) as count FROM listings;"
-      );
-
-      if ((row?.count ?? 0) === 0) {
-        for (const item of initialListings) {
-          await database.runAsync(
-            `
-            INSERT INTO listings
-            (id, title, location, price, imageKey, status, category, completion, views, likes, archived)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            `,
-            item.id,
-            item.title,
-            item.location,
-            item.price,
-            item.imageKey,
-            item.status,
-            item.category,
-            item.completion,
-            item.views,
-            item.likes,
-            item.archived
-          );
-        }
-      }
+      await addColumnIfMissing(database, "ownerId", "TEXT");
+      await addColumnIfMissing(database, "imageUrl", "TEXT");
+      await addColumnIfMissing(database, "description", "TEXT");
+      await addColumnIfMissing(database, "beds", "INTEGER DEFAULT 0");
+      await addColumnIfMissing(database, "baths", "INTEGER DEFAULT 0");
+      await addColumnIfMissing(database, "source", "TEXT DEFAULT 'local'");
 
       if (!cancelled) {
         setDb(database);
       }
-    })();
+    };
+
+    void setupDatabase();
 
     return () => {
       cancelled = true;
@@ -184,35 +310,102 @@ export default function MyListings() {
     if (!db) return;
 
     const rows = await db.getAllAsync<any>(
-      "SELECT * FROM listings WHERE archived = 0 ORDER BY CAST(id AS INTEGER) DESC;"
+      "SELECT * FROM listings WHERE archived = 0;"
     );
 
-    const mappedRows: ListingType[] = rows.map((item) => ({
-      id: item.id,
-      title: item.title,
-      location: item.location,
-      price: item.price,
-      imageKey: item.imageKey,
-      image: IMAGES[item.imageKey] ?? IMAGES.modern,
-      status: item.status,
-      category: item.category,
-      completion: item.completion,
-      views: item.views,
-      likes: item.likes,
-      archived: item.archived,
-    }));
+    const mappedRows = rows.map(mapRowToListing);
 
     setListings(mappedRows);
   }, [db]);
 
+  const syncFromFirebaseToSQLite = useCallback(async () => {
+    if (!db) return;
+
+    const auth = getAuth();
+    const userId = auth.currentUser?.uid;
+
+    const mergedItems = new Map<string, Omit<ListingType, "image">>();
+
+    try {
+      if (userId) {
+        const ownerQuery = query(
+          collection(firebaseDb, FIREBASE_COLLECTION),
+          where("ownerId", "==", userId)
+        );
+
+        const ownerSnapshot = await getDocs(ownerQuery);
+
+        ownerSnapshot.docs.forEach((docItem) => {
+          const item = mapFirebaseToSQLiteItem(
+            docItem.id,
+            docItem.data(),
+            "firebase-owner"
+          );
+
+          mergedItems.set(item.id, item);
+        });
+      }
+    } catch (error) {
+      console.log("Owner Firebase sync skipped:", error);
+    }
+
+    approvedProperties.forEach((property: any) => {
+      const id = property.id;
+
+      if (!id) return;
+
+      const ownerId = property.ownerId ?? "";
+      const belongsToCurrentOwner =
+        !ownerId || !userId || ownerId === userId;
+
+      if (!belongsToCurrentOwner) return;
+
+      const item = mapFirebaseToSQLiteItem(
+        id,
+        property,
+        "firebase-approved"
+      );
+
+      mergedItems.set(item.id, item);
+    });
+
+    const firebaseItems = Array.from(mergedItems.values());
+
+    if (firebaseItems.length === 0) {
+      await reload();
+      return;
+    }
+
+    await db.runAsync(
+      "DELETE FROM listings WHERE source = ? OR source = ?;",
+      "firebase-owner",
+      "firebase-approved"
+    );
+
+    for (const item of firebaseItems) {
+      await upsertListing(db, item);
+    }
+
+    await reload();
+  }, [db, approvedProperties, reload]);
+
   useEffect(() => {
+    if (!db) return;
+
     void reload();
-  }, [reload]);
+  }, [db, reload]);
+
+  useEffect(() => {
+    if (!db) return;
+
+    void syncFromFirebaseToSQLite();
+  }, [db, syncFromFirebaseToSQLite]);
 
   useFocusEffect(
     useCallback(() => {
       void reload();
-    }, [reload])
+      void syncFromFirebaseToSQLite();
+    }, [reload, syncFromFirebaseToSQLite])
   );
 
   useEffect(() => {
@@ -226,6 +419,12 @@ export default function MyListings() {
 
     await db.runAsync("DELETE FROM listings WHERE id = ?;", id);
     await reload();
+
+    try {
+      await deleteDoc(doc(firebaseDb, FIREBASE_COLLECTION, id));
+    } catch (error) {
+      console.log("Firebase delete skipped:", error);
+    }
   };
 
   const handleArchive = async (id: string) => {
@@ -233,6 +432,14 @@ export default function MyListings() {
 
     await db.runAsync("UPDATE listings SET archived = 1 WHERE id = ?;", id);
     await reload();
+
+    try {
+      await updateDoc(doc(firebaseDb, FIREBASE_COLLECTION, id), {
+        isArchived: true,
+      });
+    } catch (error) {
+      console.log("Firebase archive skipped:", error);
+    }
   };
 
   const filteredListings = useMemo(() => {
@@ -245,21 +452,29 @@ export default function MyListings() {
     if (search.trim()) {
       const value = search.toLowerCase();
 
-      result = result.filter(
-        (item) =>
-          item.title.toLowerCase().includes(value) ||
-          item.location.toLowerCase().includes(value) ||
-          item.status.toLowerCase().includes(value) ||
-          item.category.toLowerCase().includes(value)
-      );
+      result = result.filter((item) => {
+        const title = item.title.toLowerCase();
+        const location = item.location.toLowerCase();
+        const status = item.status.toLowerCase();
+        const category = item.category.toLowerCase();
+        const price = item.price.toString();
+
+        return (
+          title.includes(value) ||
+          location.includes(value) ||
+          status.includes(value) ||
+          category.includes(value) ||
+          price.includes(value)
+        );
+      });
     }
 
     if (sortBy === "Newest First") {
-      result = result.sort((a, b) => Number(b.id) - Number(a.id));
+      result = result.sort((a, b) => b.id.localeCompare(a.id));
     }
 
     if (sortBy === "Oldest First") {
-      result = result.sort((a, b) => Number(a.id) - Number(b.id));
+      result = result.sort((a, b) => a.id.localeCompare(b.id));
     }
 
     if (sortBy === "Highest Price") {
@@ -370,6 +585,12 @@ export default function MyListings() {
               onArchive={handleArchive}
             />
           ))}
+
+          {filteredListings.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No listings found</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -490,5 +711,16 @@ const styles = StyleSheet.create({
 
   cardsContainer: {
     marginTop: 4,
+  },
+
+  emptyContainer: {
+    alignItems: "center",
+    marginTop: 40,
+  },
+
+  emptyText: {
+    fontSize: 15,
+    color: "#98A2B3",
+    fontWeight: "500",
   },
 });

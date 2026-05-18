@@ -4,7 +4,7 @@ export interface Property {
   price: number;
   rating: number;
   location: string;
-  type: string;
+   type: "student" | "family"; 
   beds: number;
   rooms: number;
   image: string;

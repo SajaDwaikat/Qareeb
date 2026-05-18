@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+} from "firebase/firestore";
+
 import { db } from "@/lib/firebase";
 
 export default function usePendingProperties() {
@@ -25,5 +31,9 @@ export default function usePendingProperties() {
     fetchRequests();
   }, []);
 
-  return { requests };
+  return {
+    requests,
+    setRequests,
+    fetchRequests,
+  };
 }

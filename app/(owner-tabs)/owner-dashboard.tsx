@@ -96,28 +96,35 @@ export default function OwnerDashboard() {
       bg: "#F3F8FF",
     },
   ];
-
-  const manageItems = [
-    {
-      id: "1",
-      title: "Add New Property",
-      icon: "add-circle-outline",
-      route: "/Prop/add",
-      filled: true,
+    const manageItems = [
+  {
+    id: "1",
+    title: "Add New Property",
+    icon: "add-circle-outline",
+    route: "/Prop/add",
+    filled: true,
+  },
+  {
+    id: "2",
+    title: "Unverified Listings",
+    icon: "list-outline",
+    route: {
+      pathname: "/(owner-tabs)/my-listings",
+      params: { filter: "Pending" },
     },
-    {
-      id: "2",
-      title: "Unverified Listings",
-      icon: "list-outline",
-      route: {
-        pathname: "/(owner-tabs)/my-listings",
-        params: { filter: "Pending" },
-      },
-      filled: false,
-      backgroundColor: "#DCEAF5",
-    },
-  ];
-
+    filled: false,
+    backgroundColor: "#DCEAF5",
+  },
+  {
+    id: "3",
+    title: "Requests",
+    icon: "mail-open-outline",
+    route: "/owner/requests",
+    filled: false,
+    backgroundColor: "#EAF4FF",
+  },
+  
+];
   const recentListings =
     dashboardData?.recentListings?.map((item: any) => ({
       id: item.id,
@@ -156,6 +163,9 @@ export default function OwnerDashboard() {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+      <View style={{paddingTop: 20}}/>
+             
+          
       <ImageBackground
         source={require("../../assets/images/owner-hero.png")}
         style={styles.hero}

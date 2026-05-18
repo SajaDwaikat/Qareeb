@@ -1,10 +1,10 @@
 {
   "name": "qareeb",
-  "main": "expo-router/entry",
   "version": "1.0.0",
+  "main": "expo-router/entry",
+  "private": true,
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
@@ -19,12 +19,12 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@google/generative-ai": "^0.24.1",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@tanstack/react-query": "^5.100.10",
-    "@types/jest": "29.5.14",
     "axios": "^1.15.0",
     "expo": "~54.0.0",
     "expo-blur": "~15.0.8",
@@ -42,15 +42,12 @@
     "expo-splash-screen": "~31.0.13",
     "expo-sqlite": "~16.0.10",
     "expo-status-bar": "~3.0.9",
-    "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
     "expo-web-browser": "~15.0.11",
     "firebase": "^12.13.0",
-    "jest": "~29.7.0",
-    "jest-expo": "~54.0.17",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-hook-form": "^7.72.1",
+    "react-hook-form": "^7.76.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-maps": "1.20.1",
@@ -66,12 +63,15 @@
   "devDependencies": {
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.3.3",
-    "@types/jest": "^30.0.0",
-    "@types/react": "~19.1.10",
+    "@types/jest": "^29.5.14",
+    "@types/react": "~19.1.0",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
-    "react-test-renderer": "^19.1.0",
+    "jest": "^30.4.2",
+    "jest-expo": "^55.0.17",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "overrides": {
+    "postcss": "8.5.14"
+  }
 }

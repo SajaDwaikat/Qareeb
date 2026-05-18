@@ -10,9 +10,7 @@ export default function Home() {
   const tabHeight = useBottomTabBarHeight();
 
 
-  const {
-    properties: approvedProperties,
-    loading: approvedLoading,
+  const {properties: approvedProperties,loading: approvedLoading,
   } = useApprovedProperties();
 
   const topRatedProperties =
@@ -76,7 +74,7 @@ export default function Home() {
           />
         </View>
       </SafeAreaView>
-    </View>
+    </View> 
   );
 }
 

@@ -14,6 +14,8 @@ import { auth, db } from "../../lib/firebase";
 import { useLocalSearchParams } from "expo-router";
 import { doc, getDoc } from "firebase/firestore";
 
+
+const size = 60;
 export default function Login() {
   const {role} = useLocalSearchParams();
   const [email, setEmail] = React.useState("");

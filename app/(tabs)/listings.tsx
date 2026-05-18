@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {View,Text,StyleSheet,TextInput,FlatList,Pressable,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useApprovedProperties from "@/hooks/useApprovedProperties";
@@ -18,6 +18,7 @@ const filterProperties = (
 ) => {
   const searchValue = search.trim().toLowerCase();
 
+  const isNumber = searchValue !== "" && !isNaN(Number(searchValue));
 
   return properties.filter((item) => {
     const title = item.title?.toLowerCase() || "";
@@ -129,11 +130,13 @@ const toggleFavorite = useCallback(async (propertyId: string) => {
     <SafeAreaView style={styles.container}>
       <Header title="Qareeb" />
 
+      {/* Title */}
       <Text style={styles.title}>Find your space in Nablus</Text>
       <Text style={styles.subtitle}>
         Explore the best places around you
       </Text>
 
+      {/* 🔍 Search */}
       <View style={styles.searchBox}>
         <TextInput
           placeholder="Search by location or price..."
