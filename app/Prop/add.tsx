@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Image,
-  Alert,
-} from 'react-native';
+import {View,Text,TextInput,TouchableOpacity,StyleSheet,ScrollView,Image,Alert,} from 'react-native';
 import Header from "@/components/ui/Header";
 import { FlatList } from "react-native";
 import { useForm, Controller } from 'react-hook-form';
@@ -23,6 +14,7 @@ import {
   createNotification,
   getAdminReceiverIds,
 } from "@/services/notificationService";
+import { router } from "expo-router";
 type FormData = {
   title: string;
   price: string;
@@ -106,8 +98,7 @@ Alert.alert(
 };
   return (
   <SafeAreaView style={{ flex: 1 }}>
-    <Header title="Add your property"
-    showBackButton={true} />
+ <Header title="Add your property" />
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
