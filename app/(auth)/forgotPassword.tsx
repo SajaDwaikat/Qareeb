@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import {router} from "expo-router";
 
 import { Ionicons } from "@expo/vector-icons";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -39,16 +40,6 @@ export default function ForgotPasswordScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity>
-          <Ionicons name="arrow-back" size={24} color="#2563eb" />
-        </TouchableOpacity>
-
-        <Text style={styles.logo}>Digital Sanctuary</Text>
-
-        <View style={{ width: 24 }} />
-      </View>
-
       <Card style={styles.card}>
         <View style={styles.iconContainer}>
           <Ionicons name="lock-closed-outline" size={24} color="#2563eb" />
@@ -92,7 +83,9 @@ export default function ForgotPasswordScreen() {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.footerLink}>
+        <TouchableOpacity 
+        style={styles.footerLink}
+          onPress={() => router.replace("/(auth)/login")}>
           <Text style={styles.footerText}>‹ Return to login</Text>
         </TouchableOpacity>
       </Card>

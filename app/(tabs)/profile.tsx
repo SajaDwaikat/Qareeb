@@ -278,8 +278,6 @@ if (showCamera) {
             onPress={handleLogout}
           />
         </View>
-
-              
       </ScrollView>  
     </SafeAreaView>
   );
