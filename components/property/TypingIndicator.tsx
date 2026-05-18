@@ -1,12 +1,6 @@
-import React, {
-  useEffect,
-  useState,
-} from "react";
+import React, {useEffect,useState,} from "react";
 
-import {
-  View,
-  Text,
-} from "react-native";
+import {View,Text,} from "react-native";
 
 export default function TypingIndicator() {
   const [dots, setDots] = useState(".");

@@ -91,17 +91,7 @@ const {title,location,price,image,propertyId,ownerId,} = useLocalSearchParams();
       return;
     }
 
-    // if (!photo) {
-    //   Alert.alert(
-    //     "ID Required",
-    //     "Please upload a photo of your ID."
-    //   );
-
-    //   return;
-    // }
-    // setLoading(true);
-    // const imageUrl =
-    //   await uploadImage();
+  
     const imageUrl = null;
 
     const bookingRef = await addDoc(

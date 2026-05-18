@@ -1,15 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createNotification } from "@/services/notificationService";
 import { NOTIFICATION_TYPES } from "@/constants/notifications";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-} from "react-native";
+import {Alert,ScrollView,StyleSheet,Text,TouchableOpacity,View,ActivityIndicator,} from "react-native";
 import Header from "../../components/ui/Header";
 import { db } from "../../lib/firebase";
 import {

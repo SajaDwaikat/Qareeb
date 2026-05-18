@@ -1,17 +1,7 @@
-import React from "react";
-import {
-  StyleSheet,
-  ScrollView,
-  Image,
-  View,
-  Text,
-} from "react-native";
+import {StyleSheet,ScrollView,Image,View,Text,} from "react-native";
 import Header from "@/components/ui/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  MaterialCommunityIcons,
-  Ionicons,
-} from "@expo/vector-icons";
+import {MaterialCommunityIcons,Ionicons,} from "@expo/vector-icons";
 import MapView, { Marker } from "react-native-maps";
 import OwnerCard from "@/components/owner/OwnerCardprop";
 import Button from "@/components/ui/Button";
