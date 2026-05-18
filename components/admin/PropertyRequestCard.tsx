@@ -1,23 +1,40 @@
 import React from "react";
-import { View, Text, StyleSheet, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 
 interface Props {
   item: any;
   onAccept: (id: string) => void;
   onReject: (id: string) => void;
+  onDetails: (id: string) => void;
 }
 
 export default function PropertyRequestCard({
   item,
   onAccept,
   onReject,
+  onDetails,
 }: Props) {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.location}>{item.location}</Text>
+
+      <Text style={styles.location}>
+        {item.location}
+      </Text>
 
       <View style={styles.buttons}>
+        <Pressable
+          style={[styles.button, styles.details]}
+          onPress={() => onDetails(item.id)}
+        >
+          <Text style={styles.text}>Details</Text>
+        </Pressable>
+
         <Pressable
           style={[styles.button, styles.accept]}
           onPress={() => onAccept(item.id)}
@@ -44,31 +61,42 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     elevation: 3,
   },
+
   title: {
     fontWeight: "bold",
     fontSize: 16,
   },
+
   location: {
     color: "#777",
     marginTop: 4,
   },
+
   buttons: {
     flexDirection: "row",
-    marginTop: 10,
+    marginTop: 14,
   },
+
   button: {
     flex: 1,
-    padding: 10,
+    paddingVertical: 10,
     borderRadius: 10,
     alignItems: "center",
-    marginHorizontal: 5,
+    marginHorizontal: 4,
   },
+
+  details: {
+    backgroundColor: "#3498db",
+  },
+
   accept: {
     backgroundColor: "#2ecc71",
   },
+
   reject: {
     backgroundColor: "#e74c3c",
   },
+
   text: {
     color: "#fff",
     fontWeight: "bold",

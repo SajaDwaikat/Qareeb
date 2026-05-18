@@ -66,6 +66,13 @@ export default function AdminDashboardScreen() {
   const handleAccept = async (id: string) => {
     await approveProperty(id);
   };
+  
+  const handleDetails = (id: string) => {
+  router.push({
+    pathname: "/property/[id]",
+    params: { id },
+  });
+};
 
   const handleReject = async (id: string) => {
     await rejectProperty(id);
@@ -123,11 +130,12 @@ export default function AdminDashboardScreen() {
         data={requests}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <PropertyRequestCard
-            item={item}
-            onAccept={handleAccept}
-            onReject={handleReject}
-          />
+         <PropertyRequestCard
+  item={item}
+  onAccept={handleAccept}
+  onReject={handleReject}
+  onDetails={handleDetails}
+/>
         )}
       />
 
