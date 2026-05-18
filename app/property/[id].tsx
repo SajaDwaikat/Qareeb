@@ -213,6 +213,7 @@ export default function PropertyDetails() {
                 location: property.location,
                 price: String(property.price),
                 image: property.image,
+                ownerId: property.ownerId ?? "",
               },
             })
           }

@@ -244,7 +244,6 @@ export default function MyListings() {
 
     if (search.trim()) {
       const value = search.toLowerCase();
-
       result = result.filter(
         (item) =>
           item.title.toLowerCase().includes(value) ||
@@ -289,7 +288,8 @@ export default function MyListings() {
 
   return (
     <View style={styles.screen}>
-      <Header title="My Listings" />
+      <Header title="My Listings"
+      showBackButton={true} />
 
       <ScrollView
         contentContainerStyle={styles.contentContainer}
