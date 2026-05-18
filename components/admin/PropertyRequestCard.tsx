@@ -4,11 +4,12 @@ import {
   Text,
   StyleSheet,
   Pressable,
+  Alert,
 } from "react-native";
 
 interface Props {
   item: any;
-  onAccept: (id: string) => void;
+  onAccept: (id: string) => Promise<void>;
   onReject: (id: string) => void;
   onDetails: (id: string) => void;
 }
@@ -37,14 +38,44 @@ export default function PropertyRequestCard({
 
         <Pressable
           style={[styles.button, styles.accept]}
-          onPress={() => onAccept(item.id)}
+          onPress={async () => {
+            try {
+              await onAccept(item.id);
+
+              Alert.alert(
+                "Success",
+                "Request accepted successfully."
+              );
+              
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                "Something went wrong."
+              );
+            }
+          }}
         >
           <Text style={styles.text}>Accept</Text>
         </Pressable>
 
         <Pressable
           style={[styles.button, styles.reject]}
-          onPress={() => onReject(item.id)}
+          onPress={async () => {
+            try {
+              await onReject(item.id);
+
+              Alert.alert(
+                "Success",
+                "Request rejected successfully."
+              );
+              
+            } catch (error) {
+              Alert.alert(
+                "Error",
+                "Something went wrong."
+              );
+            }
+          }}
         >
           <Text style={styles.text}>Reject</Text>
         </Pressable>

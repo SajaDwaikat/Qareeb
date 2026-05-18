@@ -68,8 +68,8 @@ export default function ChatScreen() {
         id: (Date.now() + 1).toString(),
         message:
           properties.length > 0
-            ? "تم العثور على نتائج مناسبة ✨"
-            : "لا توجد نتائج مطابقة 😔",
+            ? "تم العثور على نتائج مناسبة "
+            : "لا توجد نتائج مطابقة ",
         role: "ai",
         properties,
       };
