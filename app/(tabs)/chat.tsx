@@ -13,7 +13,6 @@ import TypingIndicator from "@/components/property/TypingIndicator";
 import { searchHousing } from "@/services/housingSearch";
 import { askAI } from "@/services/openRouter";
 import { buildPrompt } from "@/utils/promptBuilder";
-
 type Message = {
   id: string;
   message: string;
@@ -25,6 +24,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+
 
   const handleSend = async () => {
     if (!input.trim()) return;
