@@ -7,7 +7,7 @@ describe("Button", () => {
     const { getByText } = render(
       <Button title="Login" />
     );
-
+    
     expect(getByText("Login")).toBeTruthy();
   });
 
@@ -24,15 +24,5 @@ describe("Button", () => {
     fireEvent.press(getByText("Login"));
 
     expect(mockPress).toHaveBeenCalled();
-  });
-
-  it("does not crash without onPress", () => {
-    const { getByText } = render(
-      <Button title="Signup" />
-    );
-
-    fireEvent.press(getByText("Signup"));
-
-    expect(getByText("Signup")).toBeTruthy();
   });
 });

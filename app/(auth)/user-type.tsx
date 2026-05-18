@@ -69,7 +69,7 @@ export default function UserType() {
               setError("Please select a role first");
               return;
             }
-        
+            
             router.replace({
               pathname: "/(auth)/signup",
               params: {role: selectedRole},
