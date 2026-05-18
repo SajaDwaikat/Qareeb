@@ -163,6 +163,9 @@ export default function OwnerDashboard() {
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+      <View style={{paddingTop: 20}}/>
+             
+          
       <ImageBackground
         source={require("../../assets/images/owner-hero.png")}
         style={styles.hero}

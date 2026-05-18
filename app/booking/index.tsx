@@ -6,7 +6,7 @@ import Header from "@/components/ui/Header";
 import {CameraView,useCameraPermissions,} from "expo-camera";
 import {ref,uploadBytes,getDownloadURL,} from "firebase/storage";
 import {addDoc,collection,serverTimestamp,} from "firebase/firestore";
-import { db, storage } from "../../lib/firebase";
+import { auth, db, storage } from "../../lib/firebase";
 import { Ionicons } from "@expo/vector-icons";
 import { NOTIFICATION_TYPES } from "@/constants/notifications";
 import { createNotification } from "@/services/notificationService";
@@ -108,8 +108,9 @@ const {title,location,price,image,propertyId,ownerId,} = useLocalSearchParams();
       collection(db, "bookings"),
       {
         propertyId,apartmentName: title,
+        userId: auth.currentUser?.uid ?? null,
         location,price,
-        propertyImage: image,
+        propertyImage: image ?? null,
         name,phone,idNumber,notes,
         idImage: imageUrl,
         status: "pending",
@@ -160,6 +161,9 @@ const {title,location,price,image,propertyId,ownerId,} = useLocalSearchParams();
   } finally {
     setLoading(false);
   }
+  console.log("OWNER ID RAW:", ownerId);
+console.log("OWNER ID TYPE:", typeof ownerId);
+console.log("IS ARRAY:", Array.isArray(ownerId));
 };
 
   if (showCamera) {
