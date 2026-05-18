@@ -1,164 +1,31 @@
-import React, { useRef, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import {View,Text,StyleSheet,TextInput,Pressable,ScrollView,Image,Alert,ActivityIndicator,} from "react-native";
+import {View,Text,StyleSheet,TextInput,Pressable,ScrollView,Image,ActivityIndicator,} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "@/components/ui/Header";
-import {CameraView,useCameraPermissions,} from "expo-camera";
-import {ref,uploadBytes,getDownloadURL,} from "firebase/storage";
-import {addDoc,collection,serverTimestamp,} from "firebase/firestore";
-import { auth, db, storage } from "../../lib/firebase";
+import {CameraView,} from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
-import { NOTIFICATION_TYPES } from "@/constants/notifications";
-import { createNotification } from "@/services/notificationService";
-
+import useBookingForm from "@/hooks/useBookingForm";
+import {useForm,Controller,} from "react-hook-form";
 export default function Booking() {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [notes, setNotes] = useState("");
-const {title,location,price,image,propertyId,ownerId,} = useLocalSearchParams();
-  const [cameraPermission, requestCameraPermission] =
-    useCameraPermissions();
-  const cameraRef = useRef<any>(null);
-  const [photo, setPhoto] =
-    useState<string | null>(null);
-  const [showCamera, setShowCamera] =
-    useState<boolean>(false);
-  const [loading, setLoading] =
-    useState<boolean>(false);
-  const openCamera = async () => {
-    if (!cameraPermission?.granted) {
-      await requestCameraPermission();
-    }
 
-    setShowCamera(true);
-  };
+  const {title,location,price,image,propertyId,ownerId,} = useLocalSearchParams();
+  const {control,handleSubmit,formState: { errors },} = useForm();
 
-  const takePhoto = async () => {
-    try {
-      if (cameraRef.current) {
-        const photoData =
-          await cameraRef.current.takePictureAsync();
-
-        setPhoto(photoData.uri);
-
-        setShowCamera(false);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const uploadImage = async () => {
-    if (!photo) return null;
-
-    const response = await fetch(photo);
-
-    const blob = await response.blob();
-
-    const fileName =
-      `bookingIDs/${Date.now()}.jpg`;
-
-    const storageRef =
-      ref(storage, fileName);
-
-    await uploadBytes(storageRef, blob);
-
-    const imageUrl =
-      await getDownloadURL(storageRef);
-
-    return imageUrl;
-  };
-
-  const handleBooking = async () => {
-  try {
-
-    if (!name || !phone || !idNumber) {
-      Alert.alert(
-        "Missing Information",
-        "Please fill all required fields."
-      );
-
-      return;
-    }
-
-    if (idNumber.length !== 9) {
-      Alert.alert(
-        "Invalid ID Number",
-        "ID number must contain exactly 9 digits."
-      );
-
-      return;
-    }
-
-  
-    const imageUrl = null;
-
-    const bookingRef = await addDoc(
-      collection(db, "bookings"),
-      {
-        propertyId,apartmentName: title,
-        userId: auth.currentUser?.uid ?? null,
-        location,price,
-        propertyImage: image ?? null,
-        name,phone,idNumber,notes,
-        idImage: imageUrl,
-        status: "pending",
-        createdAt:
-          serverTimestamp(),
-      }
-    );
-
-    console.log("OWNER ID:", ownerId);
-    if (typeof ownerId === "string" && ownerId.length > 0) {
-      try {
-        await createNotification({
-          receiverId: ownerId,
-          title: "New booking request",
-          message: `${name} requested to book ${title || "your property"}.`,
-          type: NOTIFICATION_TYPES.BOOKING_REQUEST,
-          relatedId: bookingRef.id,
-        });
-      } catch (notificationError) {
-        console.log("BOOKING NOTIFICATION ERROR:", notificationError);
-      }
-    }
-    
-
-    Alert.alert(
-      "Request Submitted",
-      "Your booking request has been sent successfully. You will receive a notification once it is confirmed."
-    );
-
-    setName("");
-    setPhone("");
-    setIdNumber("");
-    setNotes("");
-    setPhoto(null);
-
-  } catch (error) {
-
-    console.log(
-      "BOOKING ERROR:",
-      error
-    );
-
-    Alert.alert(
-      "Error",
-      "Something went wrong. Please try again."
-    );
-
-  } finally {
-    setLoading(false);
-  }
-  console.log("OWNER ID RAW:", ownerId);
-console.log("OWNER ID TYPE:", typeof ownerId);
-console.log("IS ARRAY:", Array.isArray(ownerId));
-};
+  const {photo,showCamera,loading,cameraRef,openCamera,takePhoto,handleBooking,
+  } = useBookingForm({
+    title,
+    location,
+    price,
+    image,
+    propertyId,
+    ownerId,
+  });
 
   if (showCamera) {
+
     return (
       <View style={{ flex: 1 }}>
+
         <CameraView
           ref={cameraRef}
           style={{ flex: 1 }}
@@ -169,24 +36,28 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
           onPress={takePhoto}
           style={styles.captureButton}
         >
+
           <Ionicons
             name="camera"
             size={30}
             color="#000"
           />
+
         </Pressable>
+
       </View>
     );
   }
 
   return (
+
     <SafeAreaView style={styles.container}>
+
       <Header title="Book Your Apartment" />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
       >
-       
 
         <Text style={styles.subtitle}>
           Secure your stay in Nablus with
@@ -194,49 +65,60 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
         </Text>
 
         <View style={styles.card}>
-  <Image
-    source={{
-      uri:
-        image as string ||
-        "https://via.placeholder.com/150",
-    }}
-    style={styles.image}
-  />
 
-  <View style={{ flex: 1 }}>
-    <Text style={styles.cardTitle}>
-      {title || "Apartment"}
-    </Text>
+          <Image
+            source={{
+              uri:
+                image as string ||
+                "https://via.placeholder.com/150",
+            }}
+            style={styles.image}
+          />
 
-   <View style={styles.locationRow}>
-  <Ionicons
-    name="location"
-    size={16}
-    color="#777"
-  />
-  <Text style={styles.location}>
-    {location}
-  </Text>
-</View>
+          <View style={{ flex: 1 }}>
 
-   <View style={styles.priceRow}>
-  <Ionicons
-    name="cash-outline"
-    size={18}
-    color="#007AFF"
-  />
+            <Text style={styles.cardTitle}>
+              {title || "Apartment"}
+            </Text>
 
-  <Text style={styles.price}>
-    ₪{price}
+            <View style={styles.locationRow}>
 
-    <Text style={styles.per}>
-      {" "}
-      / month
-    </Text>
-  </Text>
-</View>
-</View>
-</View>
+              <Ionicons
+                name="location"
+                size={16}
+                color="#777"
+              />
+
+              <Text style={styles.location}>
+                {location}
+              </Text>
+
+            </View>
+
+            <View style={styles.priceRow}>
+
+              <Ionicons
+                name="cash-outline"
+                size={18}
+                color="#007AFF"
+              />
+
+              <Text style={styles.price}>
+
+                ₪{price}
+
+                <Text style={styles.per}>
+                  {" "}
+                  / month
+                </Text>
+
+              </Text>
+
+            </View>
+
+          </View>
+
+        </View>
 
         <Text style={styles.sectionTitle}>
           1 Personal Details
@@ -246,24 +128,66 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
           Full Name
         </Text>
 
-        <TextInput
-          placeholder="Mohammad Amin"
-          value={name}
-          onChangeText={setName}
-          style={styles.input}
+        <Controller
+          control={control}
+          name="name"
+          rules={{
+            required:
+              "Name is required",
+          }}
+          render={({
+            field: {
+              onChange,
+              value,
+            },
+          }) => (
+            <TextInput
+              placeholder="Mohammad Amin"
+              value={value}
+              onChangeText={onChange}
+              style={styles.input}
+            />
+          )}
         />
+
+        {errors.name && (
+          <Text style={styles.error}>
+            {errors.name.message as string}
+          </Text>
+        )}
 
         <Text style={styles.label}>
           Phone Number
         </Text>
 
-        <TextInput
-          placeholder="+970 59-XXXXXXX"
-          value={phone}
-          onChangeText={setPhone}
-          style={styles.input}
-          keyboardType="phone-pad"
+        <Controller
+          control={control}
+          name="phone"
+          rules={{
+            required:
+              "Phone number is required",
+          }}
+          render={({
+            field: {
+              onChange,
+              value,
+            },
+          }) => (
+            <TextInput
+              placeholder="+970 59-XXXXXXX"
+              value={value}
+              onChangeText={onChange}
+              style={styles.input}
+              keyboardType="phone-pad"
+            />
+          )}
         />
+
+        {errors.phone && (
+          <Text style={styles.error}>
+            {errors.phone.message as string}
+          </Text>
+        )}
 
         <Text style={styles.sectionTitle}>
           2 Identity Verification
@@ -273,27 +197,65 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
           ID Number
         </Text>
 
-        <TextInput
-        placeholder="Enter ID or Passport Number"
-        value={idNumber}
-        onChangeText={(text) => {
-          const cleaned =
-          text.replace(/[^0-9]/g, "");
-          if (cleaned.length <= 9) {
-            setIdNumber(cleaned);
-          }
-        }}
-        style={styles.input}
-        keyboardType="numeric"
-        maxLength={9}
+        <Controller
+          control={control}
+          name="idNumber"
+          rules={{
+            required:
+              "ID number is required",
+
+            minLength: {
+              value: 9,
+              message:
+                "ID must be 9 digits",
+            },
+          }}
+          render={({
+            field: {
+              onChange,
+              value,
+            },
+          }) => (
+            <TextInput
+              placeholder="Enter ID Number"
+              value={value}
+              onChangeText={(text) => {
+
+                const cleaned =
+                  text.replace(
+                    /[^0-9]/g,
+                    ""
+                  );
+
+                if (
+                  cleaned.length <= 9
+                ) {
+
+                  onChange(cleaned);
+                }
+              }}
+              style={styles.input}
+              keyboardType="numeric"
+              maxLength={9}
+            />
+          )}
         />
+
+        {errors.idNumber && (
+          <Text style={styles.error}>
+            {errors.idNumber.message as string}
+          </Text>
+        )}
 
         <Pressable
           style={styles.uploadBox}
           onPress={openCamera}
         >
+
           {photo ? (
+
             <>
+
               <Image
                 source={{ uri: photo }}
                 style={styles.previewImage}
@@ -302,9 +264,13 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
               <Text style={styles.retake}>
                 Tap to retake photo
               </Text>
+
             </>
+
           ) : (
+
             <>
+
               <Ionicons
                 name="camera-outline"
                 size={34}
@@ -318,8 +284,11 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
               <Text style={styles.uploadSub}>
                 PNG, JPG up to 10MB
               </Text>
+
             </>
+
           )}
+
         </Pressable>
 
         <Text style={styles.sectionTitle}>
@@ -330,45 +299,60 @@ console.log("IS ARRAY:", Array.isArray(ownerId));
           Additional Notes
         </Text>
 
-        <TextInput
-          placeholder="Any specific requirements..."
-          value={notes}
-          onChangeText={setNotes}
-          style={[
-            styles.input,
-            { height: 90 },
-          ]}
-          multiline
+        <Controller
+          control={control}
+          name="notes"
+          render={({
+            field: {
+              onChange,
+              value,
+            },
+          }) => (
+            <TextInput
+              placeholder="Any specific requirements..."
+              value={value}
+              onChangeText={onChange}
+              style={[
+                styles.input,
+                { height: 90 },
+              ]}
+              multiline
+            />
+          )}
         />
 
         <Pressable
           style={styles.button}
-          onPress={handleBooking}
+          onPress={handleSubmit(handleBooking)}
           disabled={loading}
         >
+
           {loading ? (
+
             <ActivityIndicator color="#fff" />
+
           ) : (
+
             <Text style={styles.buttonText}>
               Submit Booking Request →
             </Text>
+
           )}
+
         </Pressable>
+
       </ScrollView>
+
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: "#f5f6f8",
     padding: 16,
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "800",
   },
 
   subtitle: {
@@ -387,20 +371,18 @@ const styles = StyleSheet.create({
   },
 
   image: {
-  width: 75,
-  height: 75,
-  borderRadius: 12,
-  marginRight: 12,
-  backgroundColor: "#ddd",
-},
+    width: 75,
+    height: 75,
+    borderRadius: 12,
+    marginRight: 12,
+    backgroundColor: "#ddd",
+  },
 
   cardTitle: {
     fontWeight: "700",
     fontSize: 16,
   },
 
-
- 
   per: {
     color: "#777",
     fontSize: 13,
@@ -424,6 +406,13 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginBottom: 18,
+  },
+
+  error: {
+    color: "red",
+    marginTop: -12,
+    marginBottom: 12,
+    marginLeft: 4,
   },
 
   uploadBox: {
@@ -474,30 +463,32 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontSize: 16,
   },
+
   locationRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 4,
-},
-location: {
-  color: "#777",
-  fontSize: 13,
-  marginLeft: 4,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 4,
+  },
 
+  location: {
+    color: "#777",
+    fontSize: 13,
+    marginLeft: 4,
+  },
 
-priceRow: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginTop: 6,
-  gap: 4,
-},
-price: {
-  color: "#007AFF",
-  fontWeight: "800",
-  fontSize: 18,
-  marginLeft: 4,
-},
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+    gap: 4,
+  },
+
+  price: {
+    color: "#007AFF",
+    fontWeight: "800",
+    fontSize: 18,
+    marginLeft: 4,
+  },
 
   captureButton: {
     position: "absolute",

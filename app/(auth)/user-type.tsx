@@ -1,9 +1,7 @@
-import { View, Text, Pressable, TouchableOpacity, StyleSheet, ScrollView} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView} from "react-native";
 import { router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useState } from "react";
-import Header from "@/components/ui/Header";
-import { set } from "react-hook-form";
 import Card from "@/components/ui/AuthCard";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "@/components/ui/Button";
