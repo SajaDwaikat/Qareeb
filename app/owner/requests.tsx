@@ -9,7 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import Header from "../../components/ui/Header";
-import { auth, db } from "../../lib/firebase";
+import { db } from "../../lib/firebase";
 import {
   collection,
   doc,
@@ -17,15 +17,18 @@ import {
   query,
   updateDoc,
   where,
-  orderBy,
 } from "firebase/firestore";
 
 type RequestItem = {
   id: string;
-  userName: string;
-  propertyTitle: string;
-  status: "Pending" | "Approved" | "Cancelled";
+  name: string;
+  apartmentName: string;
+  status: string;
   createdAt?: any;
+  propertyId?: string;
+  phone?: string;
+  location?: string;
+  price?: string;
 };
 
 export default function RequestsScreen() {
@@ -33,17 +36,9 @@ export default function RequestsScreen() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const currentUser = auth.currentUser;
-
-    if (!currentUser) {
-      setLoading(false);
-      return;
-    }
-
     const requestsQuery = query(
-      collection(db, "bookingRequests"),
-      where("ownerId", "==", currentUser.uid),
-      orderBy("createdAt", "desc")
+      collection(db, "bookings"),
+      where("status", "==", "pending")
     );
 
     const unsubscribe = onSnapshot(
@@ -68,8 +63,8 @@ export default function RequestsScreen() {
 
   const handleApprove = async (id: string) => {
     try {
-      await updateDoc(doc(db, "bookingRequests", id), {
-        status: "Approved",
+      await updateDoc(doc(db, "bookings", id), {
+        status: "approved",
       });
 
       Alert.alert("Success", "Request approved");
@@ -81,8 +76,8 @@ export default function RequestsScreen() {
 
   const handleCancel = async (id: string) => {
     try {
-      await updateDoc(doc(db, "bookingRequests", id), {
-        status: "Cancelled",
+      await updateDoc(doc(db, "bookings", id), {
+        status: "cancelled",
       });
 
       Alert.alert("Done", "Request cancelled");
@@ -116,36 +111,47 @@ export default function RequestsScreen() {
         ) : (
           requests.map((item) => (
             <View key={item.id} style={styles.card}>
-              <Text style={styles.title}>{item.propertyTitle}</Text>
-              <Text style={styles.text}>Requested by: {item.userName}</Text>
-              <Text style={styles.text}>Date: {formatDate(item.createdAt)}</Text>
-              <Text
-                style={[
-                  styles.status,
-                  item.status === "Approved" && styles.approvedStatus,
-                  item.status === "Cancelled" && styles.cancelledStatus,
-                ]}
-              >
-                {item.status}
+              <Text style={styles.title}>
+                {item.apartmentName || "No apartment name"}
               </Text>
 
-              {item.status === "Pending" && (
-                <View style={styles.buttonRow}>
-                  <TouchableOpacity
-                    style={styles.approveButton}
-                    onPress={() => handleApprove(item.id)}
-                  >
-                    <Text style={styles.buttonText}>Approve</Text>
-                  </TouchableOpacity>
+              <Text style={styles.text}>
+                Requested by: {item.name || "Unknown"}
+              </Text>
 
-                  <TouchableOpacity
-                    style={styles.cancelButton}
-                    onPress={() => handleCancel(item.id)}
-                  >
-                    <Text style={styles.buttonText}>Cancel</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              <Text style={styles.text}>
+                Date: {formatDate(item.createdAt)}
+              </Text>
+
+              {item.location ? (
+                <Text style={styles.text}>Location: {item.location}</Text>
+              ) : null}
+
+              {item.phone ? (
+                <Text style={styles.text}>Phone: {item.phone}</Text>
+              ) : null}
+
+              {item.price ? (
+                <Text style={styles.text}>Price: {item.price}</Text>
+              ) : null}
+
+              <Text style={styles.status}>Pending</Text>
+
+              <View style={styles.buttonRow}>
+                <TouchableOpacity
+                  style={styles.approveButton}
+                  onPress={() => handleApprove(item.id)}
+                >
+                  <Text style={styles.buttonText}>Approve</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => handleCancel(item.id)}
+                >
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))
         )}
@@ -209,12 +215,6 @@ const styles = StyleSheet.create({
     color: "#D97706",
     marginTop: 8,
     marginBottom: 14,
-  },
-  approvedStatus: {
-    color: "#16A34A",
-  },
-  cancelledStatus: {
-    color: "#DC2626",
   },
   buttonRow: {
     flexDirection: "row",
