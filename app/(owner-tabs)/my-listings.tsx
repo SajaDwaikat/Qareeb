@@ -11,7 +11,15 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { getAuth } from "firebase/auth";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 
 import { db as firebaseDb } from "@/lib/firebase";
 import useApprovedProperties from "@/hooks/useApprovedProperties";
@@ -39,6 +47,9 @@ type ListingType = {
   views: number;
   likes: number;
   archived: number;
+  description?: string;
+  beds?: number;
+  baths?: number;
   source?: string;
 };
 
@@ -79,18 +90,28 @@ const getFirebaseImageUrl = (item: any) => {
 
 const getStatusFromFirebase = (item: any): ListingStatus => {
   const approvalStatus = String(
-    item.approvalStatus ?? item.approval ?? ""
+    item.approvalStatus ?? item.approval ?? item.approvedStatus ?? ""
   ).toLowerCase();
+
+  const status = String(item.status ?? "").toLowerCase();
 
   const availabilityStatus = String(
-    item.availabilityStatus ?? item.status ?? ""
+    item.availabilityStatus ?? item.availability ?? ""
   ).toLowerCase();
 
-  if (approvalStatus === "pending") {
+  if (
+    approvalStatus === "pending" ||
+    approvalStatus === "wait" ||
+    status === "pending"
+  ) {
     return "Pending";
   }
 
-  if (availabilityStatus === "full") {
+  if (
+    availabilityStatus === "full" ||
+    status === "full" ||
+    item.isFull === true
+  ) {
     return "Full";
   }
 
@@ -121,16 +142,23 @@ const mapRowToListing = (item: any): ListingType => {
     views: Number(item.views ?? 0),
     likes: Number(item.likes ?? 0),
     archived: Number(item.archived ?? 0),
+    description: item.description ?? "",
+    beds: Number(item.beds ?? 0),
+    baths: Number(item.baths ?? 0),
     source: item.source ?? "local",
   };
 };
 
-const mapFirebaseToSQLiteItem = (item: any): Omit<ListingType, "image"> => {
+const mapFirebaseToSQLiteItem = (
+  id: string,
+  item: any,
+  source: string
+): Omit<ListingType, "image"> => {
   const imageUrl = getFirebaseImageUrl(item);
   const status = getStatusFromFirebase(item);
 
   return {
-    id: item.id,
+    id,
     ownerId: item.ownerId ?? "",
     title: item.title ?? "",
     location: item.location ?? "",
@@ -143,7 +171,10 @@ const mapFirebaseToSQLiteItem = (item: any): Omit<ListingType, "image"> => {
     views: Number(item.views ?? 0),
     likes: Number(item.likes ?? 0),
     archived: item.isArchived || item.archived ? 1 : 0,
-    source: "firebase-approved",
+    description: item.description ?? "",
+    beds: Number(item.beds ?? 0),
+    baths: Number(item.baths ?? 0),
+    source,
   };
 };
 
@@ -163,6 +194,54 @@ const addColumnIfMissing = async (
       `ALTER TABLE listings ADD COLUMN ${columnName} ${columnDefinition};`
     );
   }
+};
+
+const upsertListing = async (
+  database: SQLite.SQLiteDatabase,
+  item: Omit<ListingType, "image">
+) => {
+  await database.runAsync(
+    `
+    INSERT OR REPLACE INTO listings
+    (
+      id,
+      ownerId,
+      title,
+      location,
+      price,
+      imageKey,
+      imageUrl,
+      status,
+      category,
+      completion,
+      views,
+      likes,
+      archived,
+      description,
+      beds,
+      baths,
+      source
+    )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    `,
+    item.id,
+    item.ownerId ?? "",
+    item.title,
+    item.location,
+    item.price,
+    item.imageKey,
+    item.imageUrl ?? "",
+    item.status,
+    item.category,
+    item.completion,
+    item.views,
+    item.likes,
+    item.archived,
+    item.description ?? "",
+    item.beds ?? 0,
+    item.baths ?? 0,
+    item.source ?? "firebase"
+  );
 };
 
 export default function MyListings() {
@@ -201,12 +280,18 @@ export default function MyListings() {
           views INTEGER DEFAULT 0,
           likes INTEGER DEFAULT 0,
           archived INTEGER NOT NULL DEFAULT 0,
+          description TEXT,
+          beds INTEGER DEFAULT 0,
+          baths INTEGER DEFAULT 0,
           source TEXT DEFAULT 'local'
         );
       `);
 
       await addColumnIfMissing(database, "ownerId", "TEXT");
       await addColumnIfMissing(database, "imageUrl", "TEXT");
+      await addColumnIfMissing(database, "description", "TEXT");
+      await addColumnIfMissing(database, "beds", "INTEGER DEFAULT 0");
+      await addColumnIfMissing(database, "baths", "INTEGER DEFAULT 0");
       await addColumnIfMissing(database, "source", "TEXT DEFAULT 'local'");
 
       if (!cancelled) {
@@ -233,67 +318,72 @@ export default function MyListings() {
     setListings(mappedRows);
   }, [db]);
 
-  const syncApprovedFromFirebaseToSQLite = useCallback(async () => {
+  const syncFromFirebaseToSQLite = useCallback(async () => {
     if (!db) return;
 
     const auth = getAuth();
     const userId = auth.currentUser?.uid;
 
-    const firebaseItems = approvedProperties
-      .map((item: any) => mapFirebaseToSQLiteItem(item))
-      .filter((item) => {
-        const belongsToCurrentOwner =
-          !item.ownerId || !userId || item.ownerId === userId;
+    const mergedItems = new Map<string, Omit<ListingType, "image">>();
 
-        return (
-          belongsToCurrentOwner &&
-          item.status === "Available" &&
-          item.archived === 0
+    try {
+      if (userId) {
+        const ownerQuery = query(
+          collection(firebaseDb, FIREBASE_COLLECTION),
+          where("ownerId", "==", userId)
         );
-      });
+
+        const ownerSnapshot = await getDocs(ownerQuery);
+
+        ownerSnapshot.docs.forEach((docItem) => {
+          const item = mapFirebaseToSQLiteItem(
+            docItem.id,
+            docItem.data(),
+            "firebase-owner"
+          );
+
+          mergedItems.set(item.id, item);
+        });
+      }
+    } catch (error) {
+      console.log("Owner Firebase sync skipped:", error);
+    }
+
+    approvedProperties.forEach((property: any) => {
+      const id = property.id;
+
+      if (!id) return;
+
+      const ownerId = property.ownerId ?? "";
+      const belongsToCurrentOwner =
+        !ownerId || !userId || ownerId === userId;
+
+      if (!belongsToCurrentOwner) return;
+
+      const item = mapFirebaseToSQLiteItem(
+        id,
+        property,
+        "firebase-approved"
+      );
+
+      mergedItems.set(item.id, item);
+    });
+
+    const firebaseItems = Array.from(mergedItems.values());
+
+    if (firebaseItems.length === 0) {
+      await reload();
+      return;
+    }
 
     await db.runAsync(
-      "DELETE FROM listings WHERE source = ?;",
+      "DELETE FROM listings WHERE source = ? OR source = ?;",
+      "firebase-owner",
       "firebase-approved"
     );
 
     for (const item of firebaseItems) {
-      await db.runAsync(
-        `
-        INSERT OR REPLACE INTO listings
-        (
-          id,
-          ownerId,
-          title,
-          location,
-          price,
-          imageKey,
-          imageUrl,
-          status,
-          category,
-          completion,
-          views,
-          likes,
-          archived,
-          source
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        `,
-        item.id,
-        item.ownerId ?? "",
-        item.title,
-        item.location,
-        item.price,
-        item.imageKey,
-        item.imageUrl ?? "",
-        item.status,
-        item.category,
-        item.completion,
-        item.views,
-        item.likes,
-        item.archived,
-        item.source ?? "firebase-approved"
-      );
+      await upsertListing(db, item);
     }
 
     await reload();
@@ -308,14 +398,14 @@ export default function MyListings() {
   useEffect(() => {
     if (!db) return;
 
-    void syncApprovedFromFirebaseToSQLite();
-  }, [db, syncApprovedFromFirebaseToSQLite]);
+    void syncFromFirebaseToSQLite();
+  }, [db, syncFromFirebaseToSQLite]);
 
   useFocusEffect(
     useCallback(() => {
       void reload();
-      void syncApprovedFromFirebaseToSQLite();
-    }, [reload, syncApprovedFromFirebaseToSQLite])
+      void syncFromFirebaseToSQLite();
+    }, [reload, syncFromFirebaseToSQLite])
   );
 
   useEffect(() => {
@@ -327,18 +417,21 @@ export default function MyListings() {
   const handleDelete = async (id: string) => {
     if (!db) return;
 
+    await db.runAsync("DELETE FROM listings WHERE id = ?;", id);
+    await reload();
+
     try {
       await deleteDoc(doc(firebaseDb, FIREBASE_COLLECTION, id));
     } catch (error) {
       console.log("Firebase delete skipped:", error);
     }
-
-    await db.runAsync("DELETE FROM listings WHERE id = ?;", id);
-    await reload();
   };
 
   const handleArchive = async (id: string) => {
     if (!db) return;
+
+    await db.runAsync("UPDATE listings SET archived = 1 WHERE id = ?;", id);
+    await reload();
 
     try {
       await updateDoc(doc(firebaseDb, FIREBASE_COLLECTION, id), {
@@ -347,9 +440,6 @@ export default function MyListings() {
     } catch (error) {
       console.log("Firebase archive skipped:", error);
     }
-
-    await db.runAsync("UPDATE listings SET archived = 1 WHERE id = ?;", id);
-    await reload();
   };
 
   const filteredListings = useMemo(() => {
